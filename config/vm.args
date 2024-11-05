@@ -3,7 +3,7 @@
 # -sasl sasl_error_logger '{file, "log/error_log.sasl"}'
 -boot start
 
--name 'kazoo_apps@127.0.0.1'
+-name kazoo_apps
 -cookie 'changeme'
 
 -kernel inet_dist_listen_min 11500 inet_dist_listen_max 11999
