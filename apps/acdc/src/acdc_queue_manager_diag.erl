@@ -218,8 +218,9 @@ monitor_manager(Manager) ->
         'ok' ->
             monitor('process', Manager),
             Manager
-    catch
-        'error':E -> {'error', {E, erlang:get_stacktrace()}}
+    catch ?STACKTRACE(E, R, ST)
+        kz_util:log_stacktrace(ST),
+        {'error', {E, R}}
     end.
 
 %%------------------------------------------------------------------------------

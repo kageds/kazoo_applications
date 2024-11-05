@@ -97,13 +97,10 @@ restore_system_template(TemplateId) ->
     io:format("  re-initializing template ~s~n", [ModId]),
     try Mod:init() of
         'ok' -> io:format("  finished~n")
-    catch
-        _E:_T ->
-            io:format("  crashed for reason ~p:~p ~n", [_E, _T]),
-            ST = erlang:get_stacktrace(),
+    catch ?STACKTRACE(E, R, ST)
+            io:format("  crashed for reason ~p:~p ~n", [E, R]),
             kz_util:log_stacktrace(ST),
             io:format("St: ~p~n~n", [ST])
-
     end.
 
 -spec list_templates_from_db(kz_term:ne_binary()) -> kz_term:ne_binaries().
@@ -203,8 +200,7 @@ start_module(Module) when is_atom(Module) ->
     try Module:init() of
         _ -> maybe_add_module_to_autoload(Module)
     catch
-        _Type:Reason ->
-            ST = erlang:get_stacktrace(),
+        ?STACKTRACE(_Type, Reason, ST)
             lager:error("failed to start teletype module ~s with reason: ~s ~p"
                        ,[Module, _Type, Reason]
                        ),
