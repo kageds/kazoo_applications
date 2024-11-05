@@ -2,5 +2,3 @@
 *.beam
 *.app
 
-/src/modules/kt_rates.hrl
-/src/task_modules.hrl
