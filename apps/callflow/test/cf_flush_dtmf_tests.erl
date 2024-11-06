@@ -22,22 +22,21 @@
 %% @end
 %%------------------------------------------------------------------------------
 persisted_test_() ->
-    {'setup'
-    ,fun() ->
-             meck:new('cf_exe'),
-             meck:expect('cf_exe', 'set_call', fun(_Call) -> 'ok' end),
-             meck:expect('cf_exe', 'continue', fun(_Call) -> 'ok' end)
-     end
-    ,fun(_) -> meck:unload() end
-    ,[fun() ->
-              Call = kapps_call:set_dtmf_collection(<<"1234">>, kapps_call:new()),
+    {'setup',
+        fun() ->
+            meck:new('cf_exe'),
+            meck:expect('cf_exe', 'set_call', fun(_Call) -> 'ok' end),
+            meck:expect('cf_exe', 'continue', fun(_Call) -> 'ok' end)
+        end,
+        fun(_) -> meck:unload() end, [
+            fun() ->
+                Call = kapps_call:set_dtmf_collection(<<"1234">>, kapps_call:new()),
 
-              cf_flush_dtmf:handle(kz_json:new(), Call),
+                cf_flush_dtmf:handle(kz_json:new(), Call),
 
-              DTMF = kapps_call:get_dtmf_collection(
-                       meck:capture(1, 'cf_exe', 'set_call', 1, 1)
-                      ),
-              ?assertEqual('undefined', DTMF)
-      end
-     ]
-    }.
+                DTMF = kapps_call:get_dtmf_collection(
+                    meck:capture(1, 'cf_exe', 'set_call', 1, 1)
+                ),
+                ?assertEqual('undefined', DTMF)
+            end
+        ]}.
