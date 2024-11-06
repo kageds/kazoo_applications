@@ -1,0 +1,190 @@
+(kazoo_apps@debian12-kazoo.kageds.com)2> 11:01:55.730 debug kz_amqp_channel.{239,5} published(190b4a54b948a0ed490cfdb83411ef7a 1K) to nodes(amqp://guest:guest@127.0.0.1:5672) exchange (routing key ) via <0.3832.0>
+11:01:55.732 debug gen_listener.{1920,5} new heap size 20688 (delta 87664)
+11:02:00.719 debug kz_tasks_trigger.{220,5} binding tasks.triggers.minute triggered <0.5304.0> via #Ref<0.1468327524.1709441025.210734>
+11:02:00.720 debug kz_tasks_trigger.{128,5} job <0.5304.0> terminated normally
+11:02:08.806 debug kz_amqp_channel.{239,5} published(55e5b89258f70ff68ab35ca0e15daab1 1K) to nodes(amqp://guest:guest@127.0.0.1:5672) exchange (routing key ) via <0.3832.0>
+11:02:08.807 debug gen_listener.{1920,5} new heap size 20688 (delta 87664)
+11:02:17.337 debug crossbar_init.{45,13} routing to version 2
+11:02:17.337 info api_resource.{96,5} PUT: /v2/accounts/c7e4ccda04d4ca8f9e03c8c7b54f6131/users? from 10.1.1.31
+11:02:17.337 debug api_util.{214,5} application/json content type when getting req data
+11:02:17.337 debug api_util.{545,5} received request body payload (size: 160 bytes)
+11:02:17.338 debug api_util.{578,13} request has a json payload: {
+    "data": {
+        "first_name":"Alan",
+        "last_name":"Evans",
+        "username": "alan2@kageds.com",
+        "password": "***REDACTED***"
+    }
+}
+11:02:17.338 debug api_util.{300,13} request json is valid
+11:02:17.338 debug api_util.{886,13} using auth token from header
+11:02:17.338 debug crossbar_bindings.{102,5} folding v2_resource.init
+11:02:17.338 debug api_resource.{328,13} run: known_methods
+11:02:17.338 debug api_resource.{339,5} run: allowed_methods
+11:02:17.339 debug crossbar_bindings.{90,5} pmapping v2_resource.early_authenticate
+11:02:17.339 debug kazoo_bindings.{873,13} matched [<<"early_authenticate">>,<<"*">>] to [<<"early_authenticate">>,<<"v2_resource">>]
+11:02:17.339 debug cb_token_auth.{196,5} checking auth token
+11:02:17.340 debug kz_auth_keys.{75,5} storing public key <<"4426aa4074787edb1138db546a0026e7">> in cache
+11:02:17.345 debug kz_auth_jwt.{143,5} verifying claimed identity
+11:02:17.345 debug kz_auth_identity.{383,5} verifying key for identity '01f05e04b85231261d23bf2dc4192d89'
+11:02:17.345 debug api_util.{796,13} one true context: []
+11:02:17.346 debug api_resource.{352,5} run: authed_allowed_methods
+11:02:17.346 debug crossbar_bindings.{85,5} mapping v2_resource.allowed_methods.users
+11:02:17.346 debug kazoo_bindings.{816,5} exact match for v2_resource.allowed_methods.users
+11:02:17.347 debug cb_accounts.{986,13} account c7e4ccda04d4ca8f9e03c8c7b54f6131 db exists, setting operating database as account%2Fc7%2Fe4%2Fccda04d4ca8f9e03c8c7b54f6131
+11:02:17.347 debug crossbar_bindings.{90,5} pmapping v2_resource.authenticate
+11:02:17.347 debug kazoo_bindings.{873,13} matched [<<"authenticate">>,<<"*">>] to [<<"authenticate">>,<<"v2_resource">>]
+11:02:17.348 debug cb_modules_util.{157,5} flat token cost of 1 configured
+11:02:17.348 debug kz_buckets.{172,5} bucket (crossbar 10.1.1.31/c7e4ccda04d4ca8f9e03c8c7b54f6131) missing, starting
+11:02:17.348 debug kz_buckets.{342,5} maybe starting token bucket for crossbar, 10.1.1.31/c7e4ccda04d4ca8f9e03c8c7b54f6131 (100 at 10/second)
+11:02:17.349 debug kz_token_bucket.{195,5} starting token bucket with 100 max, filling at 10/second, in a block: true
+11:02:17.349 debug kz_buckets.{354,21} new bucket for crossbar, 10.1.1.31/c7e4ccda04d4ca8f9e03c8c7b54f6131: <0.5338.0>
+11:02:17.349 debug kz_token_bucket.{259,5} updated name to {<<"crossbar">>,<<"10.1.1.31/c7e4ccda04d4ca8f9e03c8c7b54f6131">>}
+11:02:17.349 debug kz_token_bucket.{216,13} consumed 1, 99 left
+11:02:17.349 debug kazoo_bindings.{856,5} exact match for v2_resource.authenticate
+11:02:17.349 debug crossbar_bindings.{90,5} pmapping v2_resource.authorize
+11:02:17.349 debug kazoo_bindings.{856,5} exact match for v2_resource.authorize
+11:02:17.349 debug kazoo_bindings.{873,13} matched [<<"authorize">>,<<"*">>] to [<<"authorize">>,<<"v2_resource">>]
+11:02:17.350 debug cb_context.{310,5} checking for superduper admin: c7e4ccda04d4ca8f9e03c8c7b54f6131
+11:02:17.350 debug cb_context.{313,13} the requestor is a superduper admin
+11:02:17.350 debug cb_simple_authz.{146,13} authorizing, the request does not contain any system administration modules
+11:02:17.350 debug cb_simple_authz.{69,13} authorizing the request
+11:02:17.350 debug cb_token_restrictions.{166,5} checking for restrictions for 01f05e04b85231261d23bf2dc4192d89 in c7e4ccda04d4ca8f9e03c8c7b54f6131 using cb_user_auth method
+11:02:17.350 debug crossbar_bindings.{90,5} pmapping v2_resource.authorize.users
+11:02:17.350 debug api_resource.{539,5} run: content_types_provided
+11:02:17.350 debug crossbar_bindings.{102,5} folding v2_resource.content_types_provided.users
+11:02:17.350 debug api_resource.{556,5} ctp: [{{<<"application">>,<<"json">>,[]},to_json},{{<<"application">>,<<"x-json">>,[]},to_json},{{<<"application">>,<<"octet-stream">>,[]},to_csv},{{<<"text">>,<<"csv">>,[]},to_csv},{{<<"text">>,<<"comma-separated-values">>,[]},to_csv}]
+11:02:17.350 debug api_resource.{697,5} run: languages_provided
+11:02:17.350 debug crossbar_bindings.{102,5} folding v2_resource.languages_provided.users
+11:02:17.350 debug api_resource.{725,5} run: resource_exists
+11:02:17.350 debug crossbar_bindings.{85,5} mapping v2_resource.resource_exists.users
+11:02:17.351 debug kazoo_bindings.{816,5} exact match for v2_resource.resource_exists.users
+11:02:17.351 debug api_resource.{737,5} requested resource exists, validating it
+11:02:17.351 debug crossbar_bindings.{102,5} folding v2_resource.validate_resource.accounts
+11:02:17.351 debug cb_accounts.{986,13} account c7e4ccda04d4ca8f9e03c8c7b54f6131 db exists, setting operating database as account%2Fc7%2Fe4%2Fccda04d4ca8f9e03c8c7b54f6131
+11:02:17.351 debug crossbar_bindings.{102,5} folding v2_resource.validate_resource.users
+11:02:17.351 debug crossbar_bindings.{102,5} folding v2_resource.validate.users
+11:02:17.352 debug kzd_users.{1104,13} normalized username 'alan2@kageds.com' to 'alan2@kageds.com'
+11:02:17.358 debug kzd_users.{1130,13} username 'alan2@kageds.com' (currently 'undefined') is unique within account
+11:02:17.375 debug kzd_module_utils.{68,5} validating payload against schema users
+11:02:17.382 debug kzd_module_utils.{87,13} schema validation passed
+11:02:17.382 debug kzd_users.{1223,5} new user doc passed schema validation
+11:02:17.382 debug kzd_users.{1261,13} initializing identity secret
+11:02:17.382 debug kzd_users.{1287,13} hotdesk id 'undefined' (currently 'undefined') is unique within account
+11:02:17.389 debug kzd_users.{1344,13} requested different username (new: alan2@kageds.com current: undefined) with a password
+11:02:17.389 debug kzd_users.{1472,5} updating cred hashes for user alan2@kageds.com
+11:02:17.389 debug kzd_users.{1491,13} resetting identity secret
+11:02:17.389 debug cb_users_v2.{489,13} successfull validated user object create
+11:02:17.390 debug crossbar_bindings.{102,5} folding v2_resource.billing
+11:02:17.390 debug api_util.{1183,13} billing returned success
+11:02:17.390 debug api_resource.{746,13} requested resource creation validated
+11:02:17.390 debug api_resource.{771,5} run: moved_permanently
+11:02:17.390 debug api_resource.{813,5} run: is_conflict: false
+11:02:17.390 debug api_resource.{579,5} run: content_types_accepted
+11:02:17.390 debug crossbar_bindings.{102,5} folding v2_resource.content_types_accepted.users
+11:02:17.390 debug api_resource.{593,13} checking client content type '<<"application/json">>' against accepted
+11:02:17.390 debug api_resource.{644,5} endpoint(s) specify no accepted content-types, using defaults
+11:02:17.390 debug api_resource.{688,5} adding accepted content-type: {<<"text">>,<<"comma-separated-values">>}(from_binary)
+11:02:17.390 debug api_resource.{688,5} adding accepted content-type: {<<"text">>,<<"csv">>}(from_binary)
+11:02:17.390 debug api_resource.{688,5} adding accepted content-type: {<<"application">>,<<"octet-stream">>}(from_binary)
+11:02:17.390 debug api_resource.{688,5} adding accepted content-type: {<<"multipart">>,<<"mixed">>}(from_form)
+11:02:17.390 debug api_resource.{688,5} adding accepted content-type: {<<"multipart">>,<<"form-data">>}(from_form)
+11:02:17.390 debug api_resource.{688,5} adding accepted content-type: {<<"application">>,<<"x-www-form-urlencoded">>}(from_form)
+11:02:17.391 debug api_resource.{688,5} adding accepted content-type: {<<"application">>,<<"x-json">>}(from_json)
+11:02:17.391 debug api_resource.{688,5} adding accepted content-type: {<<"application">>,<<"json">>}(from_json)
+11:02:17.391 debug api_resource.{656,5} endpoint(s) accepted content-types: [{{<<"application">>,<<"json">>,'*'},from_json},{{<<"application">>,<<"x-json">>,'*'},from_json},{{<<"application">>,<<"x-www-form-urlencoded">>,'*'},from_form},{{<<"multipart">>,<<"form-data">>,'*'},from_form},{{<<"multipart">>,<<"mixed">>,'*'},from_form},{{<<"application">>,<<"octet-stream">>,'*'},from_binary},{{<<"text">>,<<"csv">>,'*'},from_binary},{{<<"text">>,<<"comma-separated-values">>,'*'},from_binary}]
+11:02:17.391 debug api_resource.{830,5} run: from_json
+11:02:17.391 debug crossbar_bindings.{102,5} folding v2_resource.execute.put.users
+11:02:17.392 debug crossbar_services.{44,5} verifying billing services requirements for account c7e4ccda04d4ca8f9e03c8c7b54f6131
+11:02:17.392 debug kz_services.{947,14} fetching services doc c7e4ccda04d4ca8f9e03c8c7b54f6131 (with cache)
+11:02:17.393 debug kz_services_quantities.{314,5} calculated 1 possible services change
+11:02:17.393 debug kz_services_plans.{92,5} fetching service plan documents
+11:02:17.403 debug kz_services_plans.{153,13} found 0 references to object plans
+11:02:17.409 debug kz_services_invoices.{130,5} creating current invoices
+11:02:17.409 debug kz_services_invoices.{135,5} creating proposed invoices
+11:02:17.409 debug crossbar_services.{66,5} request has no billable additions, allowing
+11:02:17.410 debug crossbar_doc.{716,5} kz_datamgr:save_doc(<<"account%2Fc7%2Fe4%2Fccda04d4ca8f9e03c8c7b54f6131">>, {[{<<"first_name">>,<<"Alan">>},{<<"last_name">>,<<"Evans">>},{<<"username">>,<<"alan2@kageds.com">>},{<<"pvt_type">>,<<"user">>},{<<"pvt_signature_secret">>,<<"ac79eb8de1ebc2c7eb1887ea4bed5f69">>},{<<"pvt_sha1_auth">>,<<"b8fd54191ababc44566de702ef9e6ff1cd5d2c33">>},{<<"pvt_md5_auth">>,<<"f909ac4233a0bfa0ec2c5b773547d887">>},{<<"pvt_vsn">>,<<"1">>},{<<"pvt_account_id">>,<<"c7e4ccda04d4ca8f9e03c8c7b54f6131">>},{<<"pvt_account_db">>,<<"account%2Fc7%2Fe4%2Fccda04d4ca8f9e03c8c7b54f6131">>},{<<"pvt_created">>,63898110137},{<<"pvt_modified">>,63898110137},{<<"pvt_request_id">>,<<"eb1beb5589234e801359cf3b30cc64b1">>},{<<"pvt_auth_user_id">>,<<"01f05e04b85231261d23bf2dc4192d89">>},{<<"pvt_auth_account_id">>,<<"c7e4ccda04d4ca8f9e03c8c7b54f6131">>},{<<"pvt_is_authenticated">>,true},{<<"pvt_alphanum_name">>,<<"alanevans">>}]}, [])
+11:02:17.445 debug kzs_publish.{55,5} maybe publishing db/doc change: <0.5349.0>
+11:02:17.446 debug crossbar_doc.{708,5} executing service subscriptions update in the background
+11:02:17.446 debug cb_users_v2.{424,5} trying to publish new user notification
+11:02:17.446 debug api_resource.{860,5} content-type provided is to_json
+11:02:17.447 info crossbar_services.{144,5} committing updates to c7e4ccda04d4ca8f9e03c8c7b54f6131
+11:02:17.447 debug kz_amqp_worker.{277,13} application ranch checked out worker <0.3274.0> from pool kz_amqp_pool
+11:02:17.447 debug api_util.{1833,13} adding resp header content-type: <<"application/json">>
+11:02:17.447 debug kz_services.{947,14} fetching services doc c7e4ccda04d4ca8f9e03c8c7b54f6131 (with cache)
+11:02:17.447 debug kz_services_quantities.{314,5} calculated 1 possible services change
+11:02:17.447 debug kz_services.{1146,5} commit any changes to account c7e4ccda04d4ca8f9e03c8c7b54f6131
+11:02:17.447 debug kz_services_quantities.{44,5} fetching account quantities for c7e4ccda04d4ca8f9e03c8c7b54f6131
+11:02:17.448 debug api_util.{1833,13} adding resp header location: <<"/v2/accounts/c7e4ccda04d4ca8f9e03c8c7b54f6131/users/0f8994608a00b559c5a6cadf5e6e3c57">>
+11:02:17.448 debug api_resource.{272,5} session finished: normal
+11:02:17.448 info api_resource.{286,5} PUT request fulfilled in 110 ms 20K232B mem 2K512B bin
+11:02:17.449 debug kz_amqp_worker.{277,13} application ranch checked out worker <0.3273.0> from pool kz_amqp_pool
+11:02:17.449 debug crossbar_bindings.{90,5} pmapping v2_resource.finish_request.PUT.users
+11:02:17.449 debug kz_amqp_channel.{272,5} published to configuration(direct 498B) exchange (routing key doc_created.account%2Fc7%2Fe4%2Fccda04d4ca8f9e03c8c7b54f6131.user.0f8994608a00b559c5a6cadf5e6e3c57) via <0.3797.0>
+11:02:17.449 debug kz_amqp_worker.{810,13} published message 64d8ab4eed592ced for <0.5349.0>
+11:02:17.450 debug kz_amqp_channel.{272,5} published to notifications(direct 411B) exchange (routing key notifications.user.new) via <0.3792.0>
+11:02:17.450 debug kz_amqp_worker.{743,13} published request with msg id 0bdaaec847551dd1 for <0.5352.0>
+11:02:17.453 debug kz_cache_listener.{212,5} executed pmap routing key kapi.conf.kazoo_endpoint_cache.account%2Fc7%2Fe4%2Fccda04d4ca8f9e03c8c7b54f6131.user.doc_created.0f8994608a00b559c5a6cadf5e6e3c57
+11:02:17.454 debug webhooks_object.{102,13} no hooks to handle doc_created for c7e4ccda04d4ca8f9e03c8c7b54f6131
+11:02:17.454 debug webhooks_notifications.{118,13} no hooks to handle new_user for c7e4ccda04d4ca8f9e03c8c7b54f6131
+11:02:17.454 debug kz_cache_listener.{212,5} executed pmap routing key kapi.conf.callflow_cache.account%2Fc7%2Fe4%2Fccda04d4ca8f9e03c8c7b54f6131.user.doc_created.0f8994608a00b559c5a6cadf5e6e3c57
+11:02:17.454 debug kz_cache_listener.{212,5} executed pmap routing key kapi.conf.kazoo_data_cache.account%2Fc7%2Fe4%2Fccda04d4ca8f9e03c8c7b54f6131.user.doc_created.0f8994608a00b559c5a6cadf5e6e3c57
+11:02:17.460 debug teletype_shared_listener.{114,5} instrumenting teletype for call_id <<"0bdaaec847551dd1">>
+11:02:17.465 debug kapps_config.{502,13} missing category crossbar.devices(default) [<<"provisioning_type">>]: undefined
+11:02:17.465 debug provisioner_util.{725,13} using <<"provisioner">> for provisioner_type
+11:02:17.465 debug kapps_config.{502,13} missing category provisioner(default) [<<"provisioning_type">>]: undefined
+11:02:17.481 debug kz_services.{947,14} fetching services doc c7e4ccda04d4ca8f9e03c8c7b54f6131 (with cache)
+11:02:17.482 debug teletype_util.{707,5} notification configuration is: <<"teletype">>
+11:02:17.482 debug teletype_bindings.{65,5} dispatching notification teletype.notification.new_user
+11:02:17.482 debug kazoo_bindings.{816,5} exact match for teletype.notification.new_user
+11:02:17.483 debug teletype_new_user.{72,5} valid data for new_user, processing...
+11:02:17.483 debug kz_services.{947,14} fetching services doc c7e4ccda04d4ca8f9e03c8c7b54f6131 (with cache)
+11:02:17.497 debug teletype_util.{751,13} system has notification.new_user, checking if enabled
+11:02:17.500 debug teletype_templates.{201,5} trying to fetch template 'new_user' for 'c7e4ccda04d4ca8f9e03c8c7b54f6131' account
+11:02:17.500 debug kz_services.{947,14} fetching services doc c7e4ccda04d4ca8f9e03c8c7b54f6131 (with cache)
+11:02:17.500 debug kz_services.{947,14} fetching services doc c7e4ccda04d4ca8f9e03c8c7b54f6131 (with cache)
+11:02:17.507 debug teletype_templates.{182,13} rendering system template for new_user
+11:02:17.507 debug kz_template.{103,5} rendering using new_user.text/plain
+11:02:17.509 debug kz_template.{106,13} rendered template successfully
+11:02:17.509 debug kz_template.{103,5} rendering using new_user.text/html
+11:02:17.509 debug kz_template.{106,13} rendered template successfully
+11:02:17.509 debug kz_services.{947,14} fetching services doc c7e4ccda04d4ca8f9e03c8c7b54f6131 (with cache)
+11:02:17.510 info teletype_renderer.{53,5} starting render of <<"subject">>
+11:02:17.510 debug teletype_renderer.{129,5} trying to compile template subject as teletype_3c302e343934362e303e_c407c57e for {<0.5362.0>,[alias|#Ref<0.1468327524.1709506561.214752>]}
+11:02:17.629 debug kz_template.{136,5} built renderer for teletype_3c302e343934362e303e_c407c57e
+11:02:17.629 debug kz_template.{103,5} rendering using teletype_3c302e343934362e303e_c407c57e
+11:02:17.629 debug kz_template.{106,13} rendered template successfully
+11:02:17.630 info teletype_renderer.{62,13} render completed in 0, pool: {ready,49,0,1}
+11:02:17.630 debug teletype_util.{801,5} checking data for 'to' email address(es)
+11:02:17.630 debug teletype_util.{795,5} checking template for 'cc' email addresses
+11:02:17.630 debug teletype_util.{795,5} checking template for 'bcc' email addresses
+11:02:17.630 debug teletype_util.{789,5} email type for 'from' not defined in template, checking just the key
+11:02:17.630 debug teletype_util.{789,5} email type for 'reply_to' not defined in template, checking just the key
+11:02:17.630 debug teletype_util.{73,6} emails: [{<<"from">>,[<<"no_reply@debian12-kazoo.kageds.com">>]}]
+11:02:17.631 debug teletype_util.{398,5} adding template text/html (encoding base64)
+11:02:17.631 debug teletype_util.{398,5} adding template text/plain (encoding 7BIT)
+11:02:17.638 debug teletype_util.{232,5} failed to send email as the TO address(es) are missing
+11:02:17.639 debug teletype_util.{161,5} attempting to save notify smtp log for new_user in account%2Fc7%2Fe4%2Fccda04d4ca8f9e03c8c7b54f6131-202411/202411-079261f1bb8c03ccf6c05d4bdd39cd24
+11:02:17.713 debug kz_services_quantities.{57,5} fetching cascade quantities for c7e4ccda04d4ca8f9e03c8c7b54f6131
+11:02:17.746 debug kzs_publish.{55,5} maybe publishing db/doc change: false
+11:02:17.747 debug teletype_bindings.{109,6} notification teletype.notification.new_user resulted in 0 success, 1 failed, 0 ignored, 0 disabled, full result: [{failed,[{<<"new_user">>,invalid_to_addresses}]}]
+11:02:17.747 debug teletype_util.{581,5} notification update (failed) sending to kazoo_apps@debian12-kazoo.kageds.com-kz_amqp_worker-<0.3273.0>-a090c2af
+11:02:17.747 debug kz_amqp_worker.{277,13} application teletype checked out worker <0.3272.0> from pool kz_amqp_pool
+11:02:17.747 debug kz_amqp_channel.{272,5} published to targeted(direct 297B) exchange (routing key kazoo_apps@debian12-kazoo.kageds.com-kz_amqp_worker-<0.3273.0>-a090c2af) via <0.3778.0>
+11:02:17.747 debug kz_amqp_worker.{810,13} published message 0bdaaec847551dd1 for <0.5362.0>
+11:02:17.753 debug kz_amqp_worker.{1358,5} recv message 0bdaaec847551dd1
+11:02:17.754 debug kz_amqp_worker.{1362,13} responses have apparently met the criteria for the client, returning
+11:02:17.754 debug kz_amqp_worker.{1363,13} response for msg id 0bdaaec847551dd1 took 303867us to return
+11:02:17.754 debug kapps_notify_publisher.{231,13} teletype failed with reason invalid_to_addresses, ignoring: true
+11:02:17.808 debug kz_services_plans.{92,5} fetching service plan documents
+11:02:17.952 debug kz_services_plans.{153,13} found 0 references to object plans
+11:02:17.952 debug kz_services_invoices.{130,5} creating current invoices
+11:02:17.952 debug kz_services_invoices.{135,5} creating proposed invoices
+11:02:17.952 debug kz_services_bookkeeper.{46,13} no changes to any invoices
+11:02:18.086 debug kzs_publish.{55,5} maybe publishing db/doc change: <0.5373.0>
+11:02:18.086 debug kz_amqp_worker.{277,13} application ranch checked out worker <0.3271.0> from pool kz_amqp_pool
+11:02:18.086 debug kz_amqp_channel.{272,5} published to configuration(direct 461B) exchange (routing key doc_edited.services.service.c7e4ccda04d4ca8f9e03c8c7b54f6131) via <0.3782.0>
+11:02:18.086 debug kz_amqp_worker.{810,13} published message b2458e1d382a627b for <0.5373.0>
+11:02:18.088 info kz_services.{1258,13} updated services document c7e4ccda04d4ca8f9e03c8c7b54f6131
+11:02:18.093 debug kz_cache_listener.{212,5} executed pmap routing key kapi.conf.kazoo_services_cache.services.service.doc_edited.c7e4ccda04d4ca8f9e03c8c7b54f6131
+11:02:18.094 debug kz_cache_listener.{212,5} executed pmap routing key kapi.conf.kazoo_data_cache.services.service.doc_edited.c7e4ccda04d4ca8f9e03c8c7b54f6131

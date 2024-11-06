@@ -80,10 +80,15 @@ send(JObj, AcctObj) ->
 
 -spec is_notice_enabled(kz_json:object()) -> boolean().
 is_notice_enabled(JObj) ->
-    case  kz_json:get_value([<<"notifications">>,
-                             <<"outbound_fax_error_to_email">>,
-                             <<"enabled">>
-                            ], JObj)
+    case
+        kz_json:get_value(
+            [
+                <<"notifications">>,
+                <<"outbound_fax_error_to_email">>,
+                <<"enabled">>
+            ],
+            JObj
+        )
     of
         'undefined' -> is_notice_enabled_default();
         Value -> kz_term:is_true(Value)
@@ -97,7 +102,8 @@ is_notice_enabled_default() ->
 %% @doc create the props used by the template render function
 %% @end
 %%------------------------------------------------------------------------------
--spec create_template_props(kz_json:object(), kz_json:objects(), kz_json:object()) -> kz_term:proplist().
+-spec create_template_props(kz_json:object(), kz_json:objects(), kz_json:object()) ->
+    kz_term:proplist().
 create_template_props(Event, Docs, Account) ->
     Now = kz_time:now_s(),
 
@@ -113,31 +119,35 @@ create_template_props(Event, Docs, Account) ->
     Timezone = kz_term:to_list(kz_json:find(<<"timezone">>, Docs, <<"UTC">>)),
     ClockTimezone = kapps_config:get_string(<<"servers">>, <<"clock_timezone">>, <<"UTC">>),
 
-    [{<<"account">>, notify_util:json_to_template_props(Account)}
-    ,{<<"service">>, notify_util:get_service_props(Event, Account, ?MOD_CONFIG_CAT)}
-    ,{<<"fax">>, [{<<"caller_id_number">>, knm_util:pretty_print(CIDNum)}
-                 ,{<<"caller_id_name">>, knm_util:pretty_print(CIDName)}
-                 ,{<<"callee_id_number">>, knm_util:pretty_print(ToNum)}
-                 ,{<<"callee_id_name">>, knm_util:pretty_print(ToName)}
-                 ,{<<"date_called_utc">>, localtime:local_to_utc(DateTime, ClockTimezone)}
-                 ,{<<"date_called">>, localtime:local_to_local(DateTime, ClockTimezone, Timezone)}
-                 ,{<<"from_user">>, knm_util:pretty_print(FromE164)}
-                 ,{<<"from_realm">>, kz_json:get_value(<<"From-Realm">>, Event)}
-                 ,{<<"to_user">>, knm_util:pretty_print(ToE164)}
-                 ,{<<"to_realm">>, kz_json:get_value(<<"To-Realm">>, Event)}
-                 ,{<<"fax_jobid">>, kz_json:get_value(<<"Fax-JobId">>, Event)}
-                 ,{<<"fax_media">>, kz_json:get_value(<<"Fax-Name">>, Event)}
-                 ,{<<"call_id">>, kz_json:get_value(<<"Call-ID">>, Event)}
-                  | fax_values(kz_json:get_value(<<"Fax-Info">>, Event))
-                 ]}
-    ,{<<"error">>, [{<<"call_info">>, kz_json:get_value(<<"Fax-Error">>, Event)}
-                   ,{<<"fax_info">>, kz_json:get_value([<<"Fax-Info">>,<<"Fax-Result-Text">>], Event)}
-                   ]}
-    ,{<<"account_db">>, kz_doc:account_db(Account)}
+    [
+        {<<"account">>, notify_util:json_to_template_props(Account)},
+        {<<"service">>, notify_util:get_service_props(Event, Account, ?MOD_CONFIG_CAT)},
+        {<<"fax">>, [
+            {<<"caller_id_number">>, knm_util:pretty_print(CIDNum)},
+            {<<"caller_id_name">>, knm_util:pretty_print(CIDName)},
+            {<<"callee_id_number">>, knm_util:pretty_print(ToNum)},
+            {<<"callee_id_name">>, knm_util:pretty_print(ToName)},
+            {<<"date_called_utc">>, localtime:local_to_utc(DateTime, ClockTimezone)},
+            {<<"date_called">>, localtime:local_to_local(DateTime, ClockTimezone, Timezone)},
+            {<<"from_user">>, knm_util:pretty_print(FromE164)},
+            {<<"from_realm">>, kz_json:get_value(<<"From-Realm">>, Event)},
+            {<<"to_user">>, knm_util:pretty_print(ToE164)},
+            {<<"to_realm">>, kz_json:get_value(<<"To-Realm">>, Event)},
+            {<<"fax_jobid">>, kz_json:get_value(<<"Fax-JobId">>, Event)},
+            {<<"fax_media">>, kz_json:get_value(<<"Fax-Name">>, Event)},
+            {<<"call_id">>, kz_json:get_value(<<"Call-ID">>, Event)}
+            | fax_values(kz_json:get_value(<<"Fax-Info">>, Event))
+        ]},
+        {<<"error">>, [
+            {<<"call_info">>, kz_json:get_value(<<"Fax-Error">>, Event)},
+            {<<"fax_info">>, kz_json:get_value([<<"Fax-Info">>, <<"Fax-Result-Text">>], Event)}
+        ]},
+        {<<"account_db">>, kz_doc:account_db(Account)}
     ].
 
 fax_values(Event) ->
-    [{kz_json:normalize_key(K), V}
+    [
+        {kz_json:normalize_key(K), V}
      || {<<"Fax-", K/binary>>, V} <- kz_json:to_proplist(Event)
     ].
 
@@ -145,7 +155,9 @@ fax_values(Event) ->
 %% @doc process the AMQP requests
 %% @end
 %%------------------------------------------------------------------------------
--spec build_and_send_email(iolist(), iolist(), iolist(), kz_term:ne_binary() | kz_term:ne_binaries(), kz_term:proplist()) -> send_email_return().
+-spec build_and_send_email(
+    iolist(), iolist(), iolist(), kz_term:ne_binary() | kz_term:ne_binaries(), kz_term:proplist()
+) -> send_email_return().
 build_and_send_email(TxtBody, HTMLBody, Subject, To, Props) when is_list(To) ->
     [build_and_send_email(TxtBody, HTMLBody, Subject, T, Props) || T <- To];
 build_and_send_email(TxtBody, HTMLBody, Subject, To, Props) ->
@@ -155,17 +167,21 @@ build_and_send_email(TxtBody, HTMLBody, Subject, To, Props) ->
     {ContentTypeParams, CharsetString} = notify_util:get_charset_params(Service),
 
     %% Content Type, Subtype, Headers, Parameters, Body
-    Email = {<<"multipart">>, <<"mixed">>
-            ,[{<<"From">>, From}
-             ,{<<"To">>, To}
-             ,{<<"Subject">>, Subject}
-             ]
-            ,ContentTypeParams
-            ,[{<<"multipart">>, <<"alternative">>, [], []
-              ,[{<<"text">>, <<"plain">>, [{<<"Content-Type">>, iolist_to_binary([<<"text/plain">>, CharsetString])}], [], iolist_to_binary(TxtBody)}
-               ,{<<"text">>, <<"html">>, [{<<"Content-Type">>, iolist_to_binary([<<"text/html">>, CharsetString])}], [], iolist_to_binary(HTMLBody)}
-               ]
-              }
-             ]
-            },
+    Email =
+        {<<"multipart">>, <<"mixed">>,
+            [
+                {<<"From">>, From},
+                {<<"To">>, To},
+                {<<"Subject">>, Subject}
+            ],
+            ContentTypeParams, [
+                {<<"multipart">>, <<"alternative">>, [], [], [
+                    {<<"text">>, <<"plain">>,
+                        [{<<"Content-Type">>, iolist_to_binary([<<"text/plain">>, CharsetString])}],
+                        [], iolist_to_binary(TxtBody)},
+                    {<<"text">>, <<"html">>,
+                        [{<<"Content-Type">>, iolist_to_binary([<<"text/html">>, CharsetString])}],
+                        [], iolist_to_binary(HTMLBody)}
+                ]}
+            ]},
     notify_util:send_email(From, To, Email).

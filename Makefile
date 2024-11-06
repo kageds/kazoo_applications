@@ -37,7 +37,7 @@ ifeq ($(REBAR),)
 $(error "Rebar not available on this system")
 endif
 
-.PHONY: all compile doc clean test dialyzer typer shell distclean pdf \
+.PHONY: all compile doc clean lint format tree test dialyzer typer shell distclean pdf \
   update-deps clean-common-test-data rebuild
 
 all: deps compile dialyzer test
@@ -57,6 +57,16 @@ update-deps:
 compile:
 		$(REBAR) compile
 
+# Format the code (if you use the rebar3_format plugin)
+lint:
+		$(REBAR) lint
+
+format:
+		$(REBAR) fmt
+
+tree:
+		$(REBAR) tree 
+
 build-release:
 		$(REBAR) as prod tar
 
@@ -72,10 +82,10 @@ $(DEPS_PLT):
 		@echo Building local plt at $(DEPS_PLT)
 		@echo
 		dialyzer --output_plt $(DEPS_PLT) --build_plt \
-		   --apps $(DEPS) -r deps
+		   --apps $(DEPS) -r apps
 
 dialyzer: $(DEPS_PLT)
-		dialyzer --fullpath --plt $(DEPS_PLT) -Wrace_conditions -r ./ebin
+		dialyzer --fullpath --plt $(DEPS_PLT) -Wrace_conditions -r ./_build/default/lib
 
 typer:
 		typer --plt $(DEPS_PLT) -r ./src

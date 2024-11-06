@@ -14,13 +14,12 @@
 -export([remove/1]).
 
 -export([
-        cleanup_soft_deletes/1
-        ]).
+    cleanup_soft_deletes/1
+]).
 
 -export([register_views/0]).
 
 -include("tasks.hrl").
-
 
 %%% API
 
@@ -42,14 +41,18 @@ help(Category, Action) ->
         {'error', Reason} -> print_error(Reason)
     end.
 
--spec add(kz_term:text(), kz_term:text(), kz_term:text(), kz_term:text(), kz_term:text()) -> 'no_return'.
+-spec add(kz_term:text(), kz_term:text(), kz_term:text(), kz_term:text(), kz_term:text()) ->
+    'no_return'.
 add(AuthAccount, Account, Category, Action, CSVFile) ->
     AuthAccountId = kz_util:format_account_id(AuthAccount),
     AccountId = kz_util:format_account_id(Account),
     case file:read_file(CSVFile) of
         {'ok', CSVBin} ->
             case kz_csv:count_rows(CSVBin) of
-                0 -> print_error(<<"Empty CSV or some row(s) longer than others or header missing">>);
+                0 ->
+                    print_error(
+                        <<"Empty CSV or some row(s) longer than others or header missing">>
+                    );
                 TotalRows ->
                     CSVName = filename:basename(CSVFile),
                     new_task(AuthAccountId, AccountId, Category, Action, TotalRows, CSVBin, CSVName)
@@ -62,14 +65,16 @@ add(AuthAccount, Account, Category, Action, CSVFile) ->
 add(AuthAccount, Account, Category, Action) ->
     AuthAccountId = kz_util:format_account_id(AuthAccount),
     AccountId = kz_util:format_account_id(Account),
-    case kz_tasks:new(AuthAccountId
-                     ,AccountId
-                     ,Category
-                     ,Action
-                     ,'undefined'
-                     ,'undefined'
-                     ,'undefined'
-                     )
+    case
+        kz_tasks:new(
+            AuthAccountId,
+            AccountId,
+            Category,
+            Action,
+            'undefined',
+            'undefined',
+            'undefined'
+        )
     of
         {'ok', TaskJObj} -> print_json(TaskJObj);
         {'error', Reason} -> handle_new_task_error(Reason, Category, Action)
@@ -139,8 +144,9 @@ print_json(Data) ->
     'no_return'.
 
 -spec print_error(any()) -> 'no_return'.
-print_error(Reason)
-  when is_atom(Reason); is_binary(Reason) ->
+print_error(Reason) when
+    is_atom(Reason); is_binary(Reason)
+->
     io:format("ERROR: ~s\n", [Reason]),
     'no_return';
 print_error(Reason) ->
@@ -155,23 +161,35 @@ attachment(TaskId, AName) ->
                 {'ok', AttachBin} ->
                     io:fwrite(AttachBin),
                     'no_return';
-                {'error', Reason} -> print_error(Reason)
+                {'error', Reason} ->
+                    print_error(Reason)
             end;
-        {'error', Reason} -> print_error(Reason)
+        {'error', Reason} ->
+            print_error(Reason)
     end.
 
--spec new_task(kz_term:ne_binary(), kz_term:ne_binary(), kz_term:ne_binary(), kz_term:ne_binary(), pos_integer(), kz_term:ne_binary(), kz_term:ne_binary()) ->
-          'no_return'.
+-spec new_task(
+    kz_term:ne_binary(),
+    kz_term:ne_binary(),
+    kz_term:ne_binary(),
+    kz_term:ne_binary(),
+    pos_integer(),
+    kz_term:ne_binary(),
+    kz_term:ne_binary()
+) ->
+    'no_return'.
 new_task(AuthAccountId, AccountId, Category, Action, TotalRows, CSVBin, CSVName) ->
     case kz_tasks:new(AuthAccountId, AccountId, Category, Action, TotalRows, CSVBin, CSVName) of
         {'ok', TaskJObj} ->
             TaskId = kz_json:get_value([<<"_read_only">>, <<"id">>], TaskJObj),
-            case kz_datamgr:put_attachment(?KZ_TASKS_DB
-                                          ,TaskId
-                                          ,?KZ_TASKS_ANAME_IN
-                                          ,CSVBin
-                                          ,[{'content_type', <<"text/csv">>}]
-                                          )
+            case
+                kz_datamgr:put_attachment(
+                    ?KZ_TASKS_DB,
+                    TaskId,
+                    ?KZ_TASKS_ANAME_IN,
+                    CSVBin,
+                    [{'content_type', <<"text/csv">>}]
+                )
             of
                 {'ok', _} -> print_json(TaskJObj);
                 {'error', Reason} -> print_error(Reason)
@@ -180,7 +198,8 @@ new_task(AuthAccountId, AccountId, Category, Action, TotalRows, CSVBin, CSVName)
             handle_new_task_error(Reason, Category, Action)
     end.
 
--spec handle_new_task_error(atom() | kz_json:object(), kz_term:ne_binary(), kz_term:ne_binary()) -> 'no_return'.
+-spec handle_new_task_error(atom() | kz_json:object(), kz_term:ne_binary(), kz_term:ne_binary()) ->
+    'no_return'.
 handle_new_task_error('unknown_category_action', Category, Action) ->
     print_error(<<"No such category / action: ", Category/binary, " ", Action/binary>>);
 handle_new_task_error(JObj, _, _) ->
