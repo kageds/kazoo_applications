@@ -1552,7 +1552,9 @@ create_json_chunk_response(Req, Context, JObjs, StartedChunk) ->
 
 -spec do_encode_to_json(kz_json:objects()) -> binary().
 do_encode_to_json(JObjs) ->
-    Encoded = kz_json:encode(JObjs),
+    Encoded = kz_term:to_binary(
+        kz_json:encode(JObjs)
+    ),
     %% remove first "[" and last "]" from json
     binary:part(Encoded, 1, size(Encoded) - 2).
 
