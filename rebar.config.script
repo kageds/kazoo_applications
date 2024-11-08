@@ -100,8 +100,16 @@ Config = [
     {override, plists, [
         {erl_opts, [{warnings_as_errors, false}]}
     ]},
-        {override, jesse, [
+    {override, eper, [
         {erl_opts, [{warnings_as_errors, false}]}
+    ]},
+    {override, jesse, [
+        {erl_opts, [{warnings_as_errors, false}]},
+        {deps, [
+            {jsx, ".*", {git, "https://github.com/talentdeficit/jsx.git", {tag, "2.9.0"}}},
+            {rfc3339, ".*",
+                {git, "https://github.com/andreineculau/rfc3339.git", {tag, "0.2.1-r15-compat"}}}
+        ]}
     ]}
 ]},
 
