@@ -74,7 +74,7 @@ doc:
 		$(REBAR) doc
 
 eunit: compile clean-common-test-data
-		$(REBAR) skip_deps=true eunit
+		$(REBAR) eunit
 
 test: compile eunit
 
