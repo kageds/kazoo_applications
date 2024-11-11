@@ -1,5 +1,56 @@
 %% Fetch branch name from the environment variable or default to "4.4"
 Branch = os:getenv("KAZOO_BRANCH", "4.4").
+KAZOO_CORE = [
+    amqp_cron,
+    amqp_leader,
+    kazoo,
+    kazoo_amqp,
+    kazoo_apps,
+    kazoo_ast,
+    kazoo_attachments, 
+    kazoo_auth,
+    kazoo_bindings,
+    kazoo_caches, 
+    kazoo_call,
+    kazoo_config, 
+    kazoo_convert,
+    kazoo_couch,
+    kazoo_csv,
+    kazoo_data,
+    kazoo_documents,
+    kazoo_edr,
+    kazoo_endpoint, 
+    kazoo_etsmgr,
+    kazoo_events,
+    kazoo_fax,
+    kazoo_fixturedb,
+    kazoo_globals,
+    kazoo_im,
+    kazoo_ips,
+    kazoo_ledgers,
+    kazoo_media,
+    kazoo_modb,
+    kazoo_number_manager,
+    kazoo_oauth,
+    kazoo_perf,
+    kazoo_proper,
+    kazoo_schemas,
+    kazoo_services, 
+    kazoo_sip,
+    kazoo_speech,
+    kazoo_stats,
+    kazoo_stdlib,
+    kazoo_tasks,
+    kazoo_templates,
+    kazoo_token_buckets,
+    kazoo_transactions,
+    kazoo_translator,
+    kazoo_voicemail,
+    kazoo_web,
+    kazoo_xml,
+    sup,
+    webseq
+].
 
 %% Define the dependencies
 Config = [
@@ -13,88 +64,16 @@ Config = [
 
 {erlfmt, [
     write,
-    {files, "apps/*/{src,include,test}/*.{hrl,erl}"}
+    {files, ["rebar.config", "apps/*/{src,include,test}/*.{hrl,erl}"]}
 ]},
 
 {plugins, [rebar3_auto]},
 
-{deps, [
-        {amqp_cron, {git_subdir, "https://github.com/kageds/kazoo_core.git", {branch, "master"}, "apps"}}
-        ,{amqp_leader, {git_subdir, "https://github.com/kageds/kazoo_core.git", {branch, "master"}, "apps"}}
-        ,{certifi, "0.7.0"}
-        ,{cowboy, {git, "https://github.com/kageds/erlang-cowboy", {tag, "2.8.0-OTP24"}}}
-        ,{ecsv, {git, "https://github.com/lazedo/ecsv", {tag, "ecsv-1"}}}
-        ,{erlazure, {git, "https://github.com/lazedo/erlazure.git", {tag, "add-start-link"}}}
-        ,{syslog, {git, "https://github.com/2600hz/erlang-syslog", {ref, "bbad537a1cb5e4f37e672d2e2665659e850662d0"}}}
-        ,erlydtl
-        ,{eunit_formatters, ".*", {git, "https://github.com/seancribbs/eunit_formatters", {branch, "master"}}}
-        ,folsom
-        ,{fusco, {git, "https://github.com/esl/fusco.git", {ref, "0a428471"}}}
-        ,{gen_smtp, {git, "https://github.com/2600hz/erlang-gen_smtp", {ref, "3f80bfcd4fd8704739d264eb4d5005d4392f2a35"}}}
-        ,gproc
-        ,{hep,{git, "https://github.com/lazedo/hep", {tag, "1.5.4"}}}
-        ,idna
-        ,{jsx, "2.8.0"}
-        ,{kazoo, {git_subdir, "https://github.com/kageds/kazoo_core.git", {branch, Branch}, "apps"}}
-        ,{kazoo_amqp, {git_subdir, "https://github.com/kageds/kazoo_core.git", {branch, Branch}, "apps"}}
-        ,{kazoo_apps, {git_subdir, "https://github.com/kageds/kazoo_core.git", {branch, Branch}, "apps"}}
-        ,{kazoo_ast, {git_subdir, "https://github.com/kageds/kazoo_core.git", {branch, Branch}, "apps"}}
-        ,{kazoo_attachments, {git_subdir, "https://github.com/kageds/kazoo_core.git", {branch, Branch}, "apps"}}
-        ,{kazoo_auth, {git_subdir, "https://github.com/kageds/kazoo_core.git", {branch, Branch}, "apps"}}
-        ,{kazoo_bindings, {git_subdir, "https://github.com/kageds/kazoo_core.git", {branch, Branch}, "apps"}}
-        ,{kazoo_caches, {git_subdir, "https://github.com/kageds/kazoo_core.git", {branch, Branch}, "apps"}}
-        ,{kazoo_call, {git_subdir, "https://github.com/kageds/kazoo_core.git", {branch, Branch}, "apps"}}
-        ,{kazoo_config, {git_subdir, "https://github.com/kageds/kazoo_core.git", {branch, Branch}, "apps"}}
-        ,{kazoo_convert, {git_subdir, "https://github.com/kageds/kazoo_core.git", {branch, Branch}, "apps"}}
-        ,{kazoo_couch, {git_subdir, "https://github.com/kageds/kazoo_core.git", {branch, Branch}, "apps"}}
-        ,{kazoo_csv, {git_subdir, "https://github.com/kageds/kazoo_core.git", {branch, Branch}, "apps"}}
-        ,{kazoo_data, {git_subdir, "https://github.com/kageds/kazoo_core.git", {branch, Branch}, "apps"}}
-        ,{kazoo_documents, {git_subdir, "https://github.com/kageds/kazoo_core.git", {branch, Branch}, "apps"}}
-        ,{kazoo_edr, {git_subdir, "https://github.com/kageds/kazoo_core.git", {branch, Branch}, "apps"}}
-        ,{kazoo_endpoint, {git_subdir, "https://github.com/kageds/kazoo_core.git", {branch, Branch}, "apps"}}
-        ,{kazoo_etsmgr, {git_subdir, "https://github.com/kageds/kazoo_core.git", {branch, Branch}, "apps"}}
-        ,{kazoo_events, {git_subdir, "https://github.com/kageds/kazoo_core.git", {branch, Branch}, "apps"}}
-        ,{kazoo_fax, {git_subdir, "https://github.com/kageds/kazoo_core.git", {branch, Branch}, "apps"}}
-        ,{kazoo_fixturedb, {git_subdir, "https://github.com/kageds/kazoo_core.git", {branch, Branch}, "apps"}}
-        ,{kazoo_globals, {git_subdir, "https://github.com/kageds/kazoo_core.git", {branch, Branch}, "apps"}}
-        ,{kazoo_im, {git_subdir, "https://github.com/kageds/kazoo_core.git", {branch, Branch}, "apps"}}
-        ,{kazoo_ips, {git_subdir, "https://github.com/kageds/kazoo_core.git", {branch, Branch}, "apps"}}
-        ,{kazoo_ledgers, {git_subdir, "https://github.com/kageds/kazoo_core.git", {branch, Branch}, "apps"}}
-        ,{kazoo_media, {git_subdir, "https://github.com/kageds/kazoo_core.git", {branch, Branch}, "apps"}}
-        ,{kazoo_modb, {git_subdir, "https://github.com/kageds/kazoo_core.git", {branch, Branch}, "apps"}}
-        ,{kazoo_number_manager, {git_subdir, "https://github.com/kageds/kazoo_core.git", {branch, Branch}, "apps"}}
-        ,{kazoo_oauth, {git_subdir, "https://github.com/kageds/kazoo_core.git", {branch, Branch}, "apps"}}
-        ,{kazoo_perf, {git_subdir, "https://github.com/kageds/kazoo_core.git", {branch, Branch}, "apps"}}
-        ,{kazoo_proper, {git_subdir, "https://github.com/kageds/kazoo_core.git", {branch, Branch}, "apps"}}
-        ,{kazoo_schemas, {git_subdir, "https://github.com/kageds/kazoo_core.git", {branch, Branch}, "apps"}}
-        ,{kazoo_services, {git_subdir, "https://github.com/kageds/kazoo_core.git", {branch, Branch}, "apps"}}
-        ,{kazoo_sip, {git_subdir, "https://github.com/kageds/kazoo_core.git", {branch, Branch}, "apps"}}
-        ,{kazoo_speech, {git_subdir, "https://github.com/kageds/kazoo_core.git", {branch, Branch}, "apps"}}
-        ,{kazoo_stats, {git_subdir, "https://github.com/kageds/kazoo_core.git", {branch, Branch}, "apps"}}
-        ,{kazoo_stdlib, {git_subdir, "https://github.com/kageds/kazoo_core.git", {branch, Branch}, "apps"}}
-        ,{kazoo_tasks, {git_subdir, "https://github.com/kageds/kazoo_core.git", {branch, Branch}, "apps"}}
-        ,{kazoo_templates, {git_subdir, "https://github.com/kageds/kazoo_core.git", {branch, Branch}, "apps"}}
-        ,{kazoo_token_buckets, {git_subdir, "https://github.com/kageds/kazoo_core.git", {branch, Branch}, "apps"}}
-        ,{kazoo_transactions, {git_subdir, "https://github.com/kageds/kazoo_core.git", {branch, Branch}, "apps"}}
-        ,{kazoo_translator, {git_subdir, "https://github.com/kageds/kazoo_core.git", {branch, Branch}, "apps"}}
-        ,{kazoo_voicemail, {git_subdir, "https://github.com/kageds/kazoo_core.git", {branch, Branch}, "apps"}}
-        ,{kazoo_web, {git_subdir, "https://github.com/kageds/kazoo_core.git", {branch, Branch}, "apps"}}
-        ,{kazoo_xml, {git_subdir, "https://github.com/kageds/kazoo_core.git", {branch, Branch}, "apps"}}
-        ,{lager, "3.9.2"}
+{deps, [{lager, "3.9.2"}
         ,{lager_syslog, {git, "https://github.com/erlang-lager/lager_syslog.git", {tag, "3.0.3"}}}
-        ,meck
-        ,{metrics, "1.0.1"}
-        ,{mimerl, "1.0.2"}
-        ,{mustache, {git, "https://github.com/mojombo/mustache.erl.git", {ref, "d0246fe"}}} 
-        ,{plists, {git, "https://github.com/2600hz/erlang-plists", {tag, "1.0.0"}}}
-        ,{rfc3339, {git, "https://github.com/andreineculau/rfc3339.git", {tag,"0.2.1-r15-compat"}}}
-        ,{ssl_verify_fun, "1.1.1"}
-        ,{sup, {git_subdir, "https://github.com/kageds/kazoo_core.git", {branch, Branch}, "apps"}}
-        ,{trie, {git, "https://github.com/okeuday/trie", {tag, "v1.5.4"}}}
-        ,{webseq, {git_subdir, "https://github.com/kageds/kazoo_core.git", {branch, Branch}, "apps"}}
-        ,{wsecli, {git, "https://github.com/esl/wsecli.git", {ref, "a89054c"}}}
-        ,{zucchini, {git, "https://github.com/devinus/zucchini", {branch, "master"}}}
-       ]},
+        ,{syslog, {git, "https://github.com/2600hz/erlang-syslog", {ref, "bbad537a1cb5e4f37e672d2e2665659e850662d0"}}}
+       ] ++
+        [{K, {git_subdir, "https://github.com/kageds/kazoo_core.git", {branch, Branch}, "apps"}} || K <- KAZOO_CORE]},
 
 {overrides, [
     {override, plists, [
@@ -119,7 +98,6 @@ Config = [
         sasl
         ,lager
         ,lager_syslog
-%%        ,{eper, none}
         ,{syntax_tools, none}
         ,{compiler, none}
         ,{runtime_tools, none}
