@@ -67,7 +67,9 @@ Config = [
     {files, ["rebar.config", "apps/*/{src,include,test}/*.{hrl,erl}"]}
 ]},
 
-{plugins, [rebar3_auto]},
+{plugins, [rebar3_auto
+           ,rebar3_git_vsn
+          ]},
 
 {deps, [{lager, "3.9.2"}
         ,{lager_syslog, {git, "https://github.com/erlang-lager/lager_syslog.git", {tag, "3.0.3"}}}
@@ -93,7 +95,7 @@ Config = [
 ]},
 
 {relx,
- [{release, {kazoo, "4.4"},
+ [{release, {kazoo, git},
         [
         sasl
         ,lager
