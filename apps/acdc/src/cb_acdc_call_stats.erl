@@ -1,5 +1,5 @@
 %%%-----------------------------------------------------------------------------
-%%% @copyright (C) 2011-2022, 2600Hz
+%%% @copyright (C) 2011-2020, 2600Hz
 %%% @doc Read only access to ACDC stats docs
 %%% This code is VERY similar to that in cb_cdrs. At some point code
 %%% that is used by both should be re-factored into a MODB utility
@@ -14,15 +14,14 @@
 %%%-----------------------------------------------------------------------------
 -module(cb_acdc_call_stats).
 
--export([
-    init/0,
-    allowed_methods/0,
-    resource_exists/0,
-    content_types_provided/1,
-    validate/1,
-    to_json/1,
-    to_csv/1
-]).
+-export([init/0
+        ,allowed_methods/0
+        ,resource_exists/0
+        ,content_types_provided/1
+        ,validate/1
+        ,to_json/1
+        ,to_csv/1
+        ]).
 
 -include_lib("crossbar/src/crossbar.hrl").
 
@@ -30,18 +29,25 @@
 -define(MAX_BULK, kapps_config:get_pos_integer(?MOD_CONFIG_CAT, <<"maximum_bulk">>, 50)).
 -define(CB_LIST, <<"call_stats/crossbar_listing">>).
 
--define(COLUMNS, [
-    {<<"id">>, fun col_id/1},
-    {<<"handled_timestamp">>, fun col_handled_timestamp/1},
-    {<<"caller_id_number">>, fun col_caller_id_number/1},
-    {<<"caller_id_name">>, fun col_caller_id_name/1},
-    {<<"entered_position">>, fun col_entered_position/1},
-    {<<"status">>, fun col_status/1},
-    {<<"agent_id">>, fun col_agent_id/1},
-    {<<"wait_time">>, fun col_wait_time/1},
-    {<<"talk_time">>, fun col_talk_time/1},
-    {<<"queue_id">>, fun col_queue_id/1}
-]).
+-define(COLUMNS
+       ,[{<<"id">>, fun col_id/1}
+        ,{<<"entered_timestamp">>, fun col_entered_timestamp/1}
+        ,{<<"abandoned_timestamp">>, fun col_abandoned_timestamp/1}
+        ,{<<"handled_timestamp">>, fun col_handled_timestamp/1}
+        ,{<<"processed_timestamp">>, fun col_processed_timestamp/1}
+        ,{<<"caller_id_number">>, fun col_caller_id_number/1}
+        ,{<<"caller_id_name">>, fun col_caller_id_name/1}
+        ,{<<"entered_position">>, fun col_entered_position/1}
+        ,{<<"exited_position">>, fun col_exited_position/1}
+        ,{<<"status">>, fun col_status/1}
+        ,{<<"agent_id">>, fun col_agent_id/1}
+        ,{<<"wait_time">>, fun col_wait_time/1}
+        ,{<<"talk_time">>, fun col_talk_time/1}
+        ,{<<"misses">>, fun col_misses/1}
+        ,{<<"required_skills">>, fun col_required_skills/1}
+        ,{<<"call_id">>, fun col_call_id/1}
+        ,{<<"queue_id">>, fun col_queue_id/1}
+        ]).
 
 -type payload() :: {cowboy_req:req(), cb_context:context()}.
 -export_type([payload/0]).
@@ -58,9 +64,7 @@
 init() ->
     _ = crossbar_bindings:bind(<<"*.allowed_methods.acdc_call_stats">>, ?MODULE, 'allowed_methods'),
     _ = crossbar_bindings:bind(<<"*.resource_exists.acdc_call_stats">>, ?MODULE, 'resource_exists'),
-    _ = crossbar_bindings:bind(
-        <<"*.content_types_provided.acdc_call_stats">>, ?MODULE, 'content_types_provided'
-    ),
+    _ = crossbar_bindings:bind(<<"*.content_types_provided.acdc_call_stats">>, ?MODULE, 'content_types_provided'),
     _ = crossbar_bindings:bind(<<"*.to_json.get.acdc_call_stats">>, ?MODULE, 'to_json'),
     _ = crossbar_bindings:bind(<<"*.to_csv.get.acdc_call_stats">>, ?MODULE, 'to_csv'),
     _ = crossbar_bindings:bind(<<"*.validate.acdc_call_stats">>, ?MODULE, 'validate'),
@@ -99,13 +103,10 @@ resource_exists() -> 'true'.
 %%------------------------------------------------------------------------------
 -spec content_types_provided(cb_context:context()) -> cb_context:context().
 content_types_provided(Context) ->
-    cb_context:add_content_types_provided(
-        Context,
-        [
-            {'to_json', ?JSON_CONTENT_TYPES},
-            {'to_csv', ?CSV_CONTENT_TYPES}
-        ]
-    ).
+    cb_context:add_content_types_provided(Context
+                                         ,[{'to_json', ?JSON_CONTENT_TYPES}
+                                          ,{'to_csv', ?CSV_CONTENT_TYPES}
+                                          ]).
 
 %%------------------------------------------------------------------------------
 %% @doc This function determines if the parameters and content are correct
@@ -126,11 +127,10 @@ validate(Context) ->
 -spec load_stats_summary(cb_context:context(), req_nouns()) -> cb_context:context().
 load_stats_summary(Context, [_, {?KZ_ACCOUNTS_DB, [_]} | _]) ->
     lager:debug("loading call stats for account ~s", [cb_context:account_id(Context)]),
-    Options = [
-        {'is_chunked', 'true'},
-        {'chunk_size', ?MAX_BULK},
-        {'mapper', crossbar_view:map_value_fun()}
-    ],
+    Options = [{'is_chunked', 'true'}
+              ,{'chunk_size', ?MAX_BULK}
+              ,{'mapper', crossbar_view:map_value_fun()}
+              ],
     crossbar_view:load_modb(Context, ?CB_LIST, Options);
 load_stats_summary(Context, _Nouns) ->
     lager:debug("invalid URL chain for stats summary request"),
@@ -140,34 +140,36 @@ load_stats_summary(Context, _Nouns) ->
 %% @doc
 %% @end
 %%------------------------------------------------------------------------------
--spec normalize_acdc_stats(cb_context:context(), kz_term:ne_binary()) ->
-    kz_term:ne_binaries() | kz_json:objects().
+-spec normalize_acdc_stats(cb_context:context(), kz_term:ne_binary()) -> kz_term:ne_binaries() | kz_json:objects().
 normalize_acdc_stats(Context, <<"csv">>) ->
     [normalize_stat_to_csv(Context, JObj) || JObj <- cb_context:resp_data(Context)];
 normalize_acdc_stats(Context, <<"json">>) ->
-    [
-        kz_json:from_list([{K, F(JObj)} || {K, F} <- ?COLUMNS])
-     || JObj <- cb_context:resp_data(Context)
-    ].
+    [kz_json:from_list([{K, F(JObj)} || {K, F} <- ?COLUMNS]) || JObj <- cb_context:resp_data(Context)].
 
 -spec normalize_stat_to_csv(cb_context:context(), kz_json:object()) -> kz_term:ne_binary().
 normalize_stat_to_csv(Context, JObj) ->
     CSV = kz_binary:join([F(JObj) || {_, F} <- ?COLUMNS], <<",">>),
     case cb_context:fetch(Context, 'chunking_started') of
-        'true' ->
-            <<CSV/binary, "\r\n">>;
+        'true' -> <<CSV/binary, "\r\n">>;
         _Else ->
             Header = kz_binary:join([K || {K, _Fun} <- ?COLUMNS], <<",">>),
             <<Header/binary, "\r\n", CSV/binary, "\r\n">>
     end.
 
 col_id(JObj) -> kz_doc:id(JObj, <<>>).
+col_entered_timestamp(JObj) -> kz_json:get_value(<<"entered_timestamp">>, JObj, <<>>).
+col_abandoned_timestamp(JObj) -> kz_json:get_value(<<"abandoned_timestamp">>, JObj, <<>>).
 col_handled_timestamp(JObj) -> kz_json:get_value(<<"handled_timestamp">>, JObj, <<>>).
+col_processed_timestamp(JObj) -> kz_json:get_value(<<"processed_timestamp">>, JObj, <<>>).
 col_caller_id_number(JObj) -> kz_json:get_value(<<"caller_id_number">>, JObj, <<>>).
 col_caller_id_name(JObj) -> kz_json:get_value(<<"caller_id_name">>, JObj, <<>>).
 col_entered_position(JObj) -> kz_json:get_value(<<"entered_position">>, JObj, <<>>).
+col_exited_position(JObj) -> kz_json:get_value(<<"exited_position">>, JObj, <<>>).
 col_status(JObj) -> kz_json:get_value(<<"status">>, JObj, <<>>).
 col_agent_id(JObj) -> kz_json:get_value(<<"agent_id">>, JObj, <<>>).
 col_wait_time(JObj) -> kz_json:get_value(<<"wait_time">>, JObj, <<>>).
 col_talk_time(JObj) -> kz_json:get_value(<<"talk_time">>, JObj, <<>>).
+col_misses(JObj) -> kz_json:get_value(<<"misses">>, JObj, <<>>).
+col_required_skills(JObj) -> kz_json:get_value(<<"required_skills">>, JObj, <<>>).
+col_call_id(JObj) -> kz_json:get_value(<<"call_id">>, JObj, <<>>).
 col_queue_id(JObj) -> kz_json:get_value(<<"queue_id">>, JObj, <<>>).

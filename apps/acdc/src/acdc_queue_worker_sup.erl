@@ -1,8 +1,12 @@
 %%%-----------------------------------------------------------------------------
-%%% @copyright (C) 2012-2022, 2600Hz
+%%% @copyright (C) 2012-2020, 2600Hz
 %%% @doc
 %%% @author James Aimonetti
-%%% @author Sponsored by GTNetwork LLC, Implemented by SIPLABS LLC
+%%% @author KAZOO-3596: Sponsored by GTNetwork LLC, implemented by SIPLABS LLC
+%%% This Source Code Form is subject to the terms of the Mozilla Public
+%%% License, v. 2.0. If a copy of the MPL was not distributed with this
+%%% file, You can obtain one at https://mozilla.org/MPL/2.0/.
+%%%
 %%% @end
 %%%-----------------------------------------------------------------------------
 -module(acdc_queue_worker_sup).
@@ -13,35 +17,33 @@
 -define(SERVER, ?MODULE).
 
 %% API
--export([
-    start_link/3,
-    stop/1,
-    listener/1,
-    shared_queue/1,
-    fsm/1,
-    status/1
-]).
+-export([start_link/3
+        ,stop/1
+        ,listener/1
+        ,shared_queue/1
+        ,fsm/1
+        ,status/1
+        ]).
 
 %% Supervisor callbacks
 -export([init/1]).
 
--define(CHILDREN, [
-    ?WORKER_ARGS('acdc_queue_listener', [self() | Args]),
-    ?WORKER_ARGS('acdc_queue_shared', [self() | Args]),
-    ?WORKER_ARGS('acdc_queue_fsm', [self() | Args])
-]).
+-define(CHILDREN, [?WORKER_ARGS('acdc_queue_listener', [self() | Args])
+                  ,?WORKER_ARGS('acdc_queue_shared', [self() | Args])
+                  ,?WORKER_ARGS('acdc_queue_fsm', [self() | Args])
+                  ]).
 
 %%%=============================================================================
 %%% API functions
 %%%=============================================================================
 
 %%------------------------------------------------------------------------------
-%% @doc Starts the supervisor.
+%% @doc Starts the supervisor
 %% @end
 %%------------------------------------------------------------------------------
--spec start_link(pid(), kz_term:ne_binary(), kz_term:ne_binary()) -> kz_types:startlink_ret().
-start_link(MgrPid, AcctId, QueueId) ->
-    supervisor:start_link(?SERVER, [MgrPid, AcctId, QueueId]).
+-spec start_link(pid(), kz_term:ne_binary(), kz_term:ne_binary()) -> kz_term:startlink_ret().
+start_link(MgrPid, AccountId, QueueId) ->
+    supervisor:start_link(?SERVER, [MgrPid, AccountId, QueueId]).
 
 -spec stop(pid()) -> 'ok' | {'error', 'not_found'}.
 stop(WorkerSup) -> supervisor:terminate_child('acdc_queues_sup', WorkerSup).
@@ -69,7 +71,7 @@ fsm(WorkerSup) ->
 
 -spec child_of_type(pid(), atom()) -> [pid()].
 child_of_type(WSup, T) ->
-    [P || {Type, P, 'worker', [_]} <- supervisor:which_children(WSup), T =:= Type].
+    [P || {Type, P,'worker', [_]} <- supervisor:which_children(WSup), T =:= Type].
 
 -spec status(pid()) -> 'ok'.
 status(Supervisor) ->
@@ -86,14 +88,12 @@ status(Supervisor) ->
 
     print_status(Status).
 
-print_status([]) ->
-    'ok';
-print_status([{_, 'undefined'} | T]) ->
-    print_status(T);
-print_status([{K, V} | T]) when is_binary(V) ->
+print_status([]) -> 'ok';
+print_status([{_, 'undefined'}|T]) -> print_status(T);
+print_status([{K, V}|T]) when is_binary(V) ->
     ?PRINT("        ~s: ~s", [K, V]),
     print_status(T);
-print_status([{K, V} | T]) ->
+print_status([{K, V}|T]) ->
     ?PRINT("        ~s: ~p", [K, V]),
     print_status(T).
 
@@ -102,7 +102,8 @@ print_status([{K, V} | T]) ->
 %%%=============================================================================
 
 %%------------------------------------------------------------------------------
-%% @doc Whenever a supervisor is started using `supervisor:start_link/[2,3]',
+%% @private
+%% @doc Whenever a supervisor is started using supervisor:start_link/[2,3],
 %% this function is called by the new process to find out about
 %% restart strategy, maximum restart frequency and child
 %% specifications.
