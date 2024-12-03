@@ -275,7 +275,6 @@ handle_status_stat(JObj, Props) ->
                  <<"logged_out">> -> kapi_acdc_stats:status_logged_out_v(JObj);
                  <<"pending_logged_out">> -> kapi_acdc_stats:status_pending_logged_out_v(JObj);
                  <<"connecting">> -> kapi_acdc_stats:status_connecting_v(JObj);
-                 <<"ringing">> -> kapi_acdc_stats:status_ringing_v(JObj);
                  <<"connected">> -> kapi_acdc_stats:status_connected_v(JObj);
                  <<"wrapup">> -> kapi_acdc_stats:status_wrapup_v(JObj);
                  <<"paused">> -> kapi_acdc_stats:status_paused_v(JObj);

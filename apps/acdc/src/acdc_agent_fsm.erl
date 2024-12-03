@@ -2436,8 +2436,8 @@ unmonitor_endpoint(EP, AccountId) ->
     catch gproc:unreg(?ENDPOINT_UPDATE_REG(AccountId, find_endpoint_id(EP))),
     catch gproc:unreg(?NEW_CHANNEL_REG(AccountId, Username)),
     catch gproc:unreg(?DESTROYED_CHANNEL_REG(AccountId, Username)),
-    catch gproc:ureg(?NEW_CHANNEL_REG(AccountId, Extension)),
-    catch gproc:ureg(?DESTROYED_CHANNEL_REG(AccountId, Extension)).
+    catch gproc:unreg(?NEW_CHANNEL_REG(AccountId, Extension)),
+    catch gproc:unreg(?DESTROYED_CHANNEL_REG(AccountId, Extension)).
 
 -spec maybe_add_endpoint(kz_term:ne_binary(), kz_json:object(), kz_json:objects(), kz_term:ne_binary()) -> any().
 maybe_add_endpoint(EPId, EP, EPs, AccountId) ->
