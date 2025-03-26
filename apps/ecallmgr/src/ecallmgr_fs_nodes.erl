@@ -479,13 +479,11 @@ handle_cast({'fs_nodeup', NodeName}, State) ->
     _ = kz_util:spawn(fun maybe_handle_nodeup/2, [NodeName, State]),
     {'noreply', State};
 handle_cast(
-    {'update_node', #node{node = NodeName, connected = Connected} = Node},
+    {'update_node', #node{node = NodeName} = Node},
     #state{nodes = Nodes} = State
 ) ->
-    erlang:monitor_node(NodeName, Connected),
     {'noreply', State#state{nodes = dict:store(NodeName, Node, Nodes)}};
 handle_cast({'remove_node', #node{node = NodeName}}, #state{nodes = Nodes} = State) ->
-    erlang:monitor_node(NodeName, 'false'),
     remove_capabilities(NodeName),
     {'noreply', State#state{nodes = dict:erase(NodeName, Nodes)}};
 handle_cast({'remove_capabilities', NodeName}, State) ->
@@ -703,9 +701,8 @@ maybe_ping_node(
         cookie = Cookie
     } = Node
 ) ->
-    erlang:set_cookie(NodeName, Cookie),
-    case net_adm:ping(NodeName) of
-        'pong' ->
+    case freeswitch:ping(NodeName) of
+        {'ok', <<"pong">>} ->
             _ = ecallmgr_fs_pinger_sup:remove_node(NodeName),
             maybe_start_node_handlers(Node);
         _Else ->
@@ -864,8 +861,8 @@ default_fs_node() ->
 try_connect_to_default_fs() ->
     Node = default_fs_node(),
     lager:info("attempting to connect default freeswitch node ~p", [Node]),
-    case net_adm:ping(Node) of
-        'pong' -> add(Node);
+    case freeswitch:ping(Node) of
+        {'ok', <<"pong">>} -> add(Node);
         _ -> 'skip'
     end.
 

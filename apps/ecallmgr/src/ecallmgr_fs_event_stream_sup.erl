@@ -59,7 +59,7 @@ init([Node, _Props]) ->
 
     SupFlags = {RestartStrategy, MaxRestarts, MaxSecondsBetweenRestarts},
     PacketSize = ?PACKET_SIZE,
-    _ = freeswitch:event_stream_framing(Node, PacketSize),
+ %%   _ = freeswitch:event_stream_framing(Node, PacketSize),
 
     {'ok', {SupFlags, ?CHILDREN(PacketSize)}}.
 

@@ -104,8 +104,8 @@ handle_info({'flush_channels', Node}, State) ->
     ecallmgr_fs_conferences:flush_node(Node),
     {'noreply', State};
 handle_info('check_node_status', #state{node = Node, timeout = Timeout} = State) ->
-    case net_adm:ping(Node) of
-        'pong' ->
+    case freeswitch:ping(Node) of
+        {'ok', <<"pong">>} ->
             %% give the node a moment to init
             timer:sleep(?MILLISECONDS_IN_SECOND),
             kz_notify:system_alert("node ~s connected to ~s", [Node, node()]),

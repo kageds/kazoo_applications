@@ -121,14 +121,14 @@ send_cmd(Node, UUID, "xferext", Dialplan) ->
     XferExt = [
         begin
             lager:debug("building xferext on node ~s: ~s", [Node, V]),
-            {kz_term:to_list(K), kz_term:to_list(V)}
+            {kz_term:to_binary(K), kz_term:to_binary(V)}
         end
      || {K, V} <- Dialplan,
-        not cmd_is_empty({kz_term:to_list(K), kz_term:to_list(V)})
+        not cmd_is_empty({kz_term:to_binary(K), kz_term:to_binary(V)})
     ],
     'ok' = freeswitch:sendmsg(Node, UUID, [{"call-command", "xferext"} | XferExt]);
-send_cmd(Node, UUID, App, Args) when not is_list(Args) ->
-    send_cmd(Node, UUID, App, kz_term:to_list(Args));
+send_cmd(Node, UUID, App, Args) when not is_binary(Args) ->
+    send_cmd(Node, UUID, App, kz_term:to_binary(Args));
 send_cmd(_Node, _UUID, "kz_multiset", "^^") ->
     'ok';
 send_cmd(Node, UUID, "playstop", _Args) ->
@@ -176,11 +176,12 @@ send_cmd(Node, _UUID, "kz_uuid_" ++ _ = API, Args) ->
     freeswitch:api(Node, kz_term:to_atom(API, 'true'), kz_term:to_list(Args));
 send_cmd(Node, UUID, App, Args) ->
     AppName = dialplan_application(App),
+    lager:info("freeswitch:sendmsg(~s, ~s, call-command execute)", [UUID, Node]),
     case
         freeswitch:sendmsg(Node, UUID, [
             {"call-command", "execute"},
-            {"execute-app-name", AppName},
-            {"execute-app-arg", kz_term:to_list(Args)}
+            {"execute-app-name", kz_term:to_binary(AppName)},
+            {"execute-app-arg", kz_term:to_binary(Args)}
         ])
     of
         {'error', 'baduuid'} ->

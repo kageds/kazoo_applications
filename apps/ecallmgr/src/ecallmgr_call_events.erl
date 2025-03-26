@@ -188,8 +188,7 @@ handle_call(_Request, _From, State) ->
 %% @end
 %%------------------------------------------------------------------------------
 -spec handle_cast(any(), state()) -> kz_types:handle_cast_ret_state(state()).
-handle_cast('init', #state{node = Node} = State) ->
-    erlang:monitor_node(Node, 'true'),
+handle_cast('init', State) ->
     TRef = erlang:send_after(?SANITY_CHECK_PERIOD, self(), 'sanity_check'),
     _ = usurp_other_publishers(State),
     {'noreply', State#state{sanity_check_tref = TRef}};
@@ -203,7 +202,6 @@ handle_cast(
     } = State
 ) ->
     lager:debug("node has changed from ~s to ~s", [OldNode, Node]),
-    erlang:monitor_node(OldNode, 'false'),
     unregister_for_events(OldNode, CallId),
     {'noreply', State#state{node = Node}, 0};
 handle_cast({'channel_redirected', Props}, State) ->
@@ -393,7 +391,6 @@ handle_info(
     } = State
 ) ->
     lager:debug("lost connection to node ~s, waiting for reconnection", [Node]),
-    erlang:monitor_node(Node, 'false'),
     TRef = erlang:send_after(?NODE_CHECK_PERIOD, self(), {'check_node_status'}),
     {'noreply', State#state{node_down_tref = TRef, is_node_up = 'false'}, 'hibernate'};
 handle_info({'nodedown', _}, #state{is_node_up = 'false'} = State) ->
@@ -451,7 +448,6 @@ handle_info(
         failed_node_checks = FNC
     } = State
 ) ->
-    erlang:monitor_node(Node, 'true'),
     %% TODO: die if there is already a event producer on the AMQP queue... ping/pong?
     case freeswitch:api(Node, 'uuid_exists', CallId) of
         {'error', 'timeout'} ->

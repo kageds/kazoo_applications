@@ -327,7 +327,6 @@ handle_cast(
         {'ok', CallId} ->
             kz_util:put_callid(CallId),
             lager:debug("originate is executing, waiting for completion"),
-            erlang:monitor_node(Node, 'true'),
             bind_to_call_events(CallId),
             CtrlQ = call_control_queue(CtrlPid),
             _ = publish_originate_started(ServerId, CallId, JObj, CtrlQ),
@@ -381,11 +380,9 @@ handle_info(
     #state{
         originate_req = JObj,
         uuid = UUID,
-        server_id = ServerId,
-        node = Node
+        server_id = ServerId
     } = State
 ) ->
-    erlang:monitor_node(Node, 'false'),
     Error = <<"lost connection to freeswitch node">>,
     _ = publish_error(Error, UUID, JObj, ServerId),
     {'stop', 'normal', State};

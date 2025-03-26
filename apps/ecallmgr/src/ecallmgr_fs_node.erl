@@ -738,7 +738,7 @@ version(Srv) ->
 
 -spec status_to_json(fs_node()) -> kz_json:object().
 status_to_json(Node) ->
-    {'ok', RawStatus} = mod_kazoo:api(Node, 'status'),
+    {'ok', RawStatus} = freeswitch:api(Node, 'status', <<>>),
     parse_status(RawStatus).
 
 -spec parse_status(kz_term:binary()) -> kz_json:object().
