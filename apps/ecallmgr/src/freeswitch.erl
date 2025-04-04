@@ -113,11 +113,13 @@ bind(_Node, _Type, _Timeout) -> {'ok', <<"mod_amqp_bind">>}.
 -spec fetch_reply(atom(), binary(), atom() | binary(), binary() | string()) -> 'ok'.
 fetch_reply(Node, FetchID, Section, Reply) ->
     Resp = props:filter_undefined(
-             [{<<"response">>, Reply}
-             ,{<<"Fetch-UUID">>, FetchID}
-             ,{<<"Switch-Nodename">>, kz_term:to_binary(Node)}
-              | kz_api:default_headers(?APP_NAME, ?APP_VERSION)
-             ]),
+        [
+            {<<"response">>, Reply},
+            {<<"Fetch-UUID">>, FetchID},
+            {<<"Switch-Nodename">>, kz_term:to_binary(Node)}
+            | kz_api:default_headers(?APP_NAME, ?APP_VERSION)
+        ]
+    ),
     kapi_freeswitch:publish_fetch_resp(FetchID, Section, Resp).
 -spec fetch_reply(
     atom(), binary(), atom() | binary(), binary() | string(), pos_integer() | 'infinity'
@@ -126,19 +128,22 @@ fetch_reply(Node, FetchID, Section, Reply) ->
 fetch_reply(Node, FetchID, Section, Reply, _Timeout) ->
     fetch_reply(Node, FetchID, Section, Reply).
 
-
 -spec ping(atom()) -> fs_api_return().
 ping(Node) ->
     Request = props:filter_undefined(
-             [{<<"ping">>, <<"01234567890">>}
-              ,{<<"Switch-Nodename">>, kz_term:to_binary(Node)}
-              | kz_api:default_headers(?APP_NAME, ?APP_VERSION)
-             ]),    
-    case kz_amqp_worker:call(
+        [
+            {<<"ping">>, <<"01234567890">>},
+            {<<"Switch-Nodename">>, kz_term:to_binary(Node)}
+            | kz_api:default_headers(?APP_NAME, ?APP_VERSION)
+        ]
+    ),
+    case
+        kz_amqp_worker:call(
             props:filter_undefined(Request),
             fun kapi_freeswitch:publish_ping_request/1,
             fun kapi_freeswitch:ping_resp_v/1
-        ) of 
+        )
+    of
         {'error', Reason} -> {'error', Reason};
         {'ok', _JObj} -> {'ok', <<"pong">>}
     end.
@@ -149,19 +154,22 @@ api(Node, Cmd) -> ?FS_MODULE:api(Node, Cmd).
 -spec api(atom(), kz_term:text(), kz_term:text()) -> fs_api_return().
 api(Node, Cmd, Args) ->
     Request = props:filter_undefined(
-             [{<<"command">>, kz_term:to_binary(Cmd)}
-             ,{<<"args">>, kz_term:to_binary(Args)}
-             ,{<<"Switch-Nodename">>, kz_term:to_binary(Node)}
-              | kz_api:default_headers(?APP_NAME, ?APP_VERSION)
-             ]),    
-    case kz_amqp_worker:call(
+        [
+            {<<"command">>, kz_term:to_binary(Cmd)},
+            {<<"args">>, kz_term:to_binary(Args)},
+            {<<"Switch-Nodename">>, kz_term:to_binary(Node)}
+            | kz_api:default_headers(?APP_NAME, ?APP_VERSION)
+        ]
+    ),
+    case
+        kz_amqp_worker:call(
             props:filter_undefined(Request),
             fun kapi_freeswitch:publish_api_request/1,
             fun kapi_freeswitch:api_resp_v/1
-        ) of
-            {'ok', JObj} -> {'ok', kz_json:get_value(<<"response">>, JObj)};
-            {'error', 'timeout'} ->  {'timeout', {Cmd, Args}};
-            Else -> Else
+        )
+    of
+        {'ok', JObj} -> {'ok', kz_json:get_value(<<"response">>, JObj)};
+        Else -> Else
     end.
 
 -spec api(atom(), kz_term:text(), kz_term:text(), timeout()) -> fs_api_return().
@@ -195,24 +203,29 @@ bgapi(Node, Cmd, Args) ->
     _ = kz_util:spawn(
         fun() ->
             Request = props:filter_undefined(
-                     [{<<"command">>, kz_term:to_binary(Cmd)}
-                     ,{<<"args">>, kz_term:to_binary(Args)}
-                     ,{<<"Switch-Nodename">>, kz_term:to_binary(Node)}
-                      | kz_api:default_headers(?APP_NAME, ?APP_VERSION)
-                     ]),    
-            case kz_amqp_worker:call(
+                [
+                    {<<"command">>, kz_term:to_binary(Cmd)},
+                    {<<"args">>, kz_term:to_binary(Args)},
+                    {<<"Switch-Nodename">>, kz_term:to_binary(Node)}
+                    | kz_api:default_headers(?APP_NAME, ?APP_VERSION)
+                ]
+            ),
+            case
+                kz_amqp_worker:call(
                     props:filter_undefined(Request),
                     fun kapi_freeswitch:publish_bgapi_request/1,
                     fun kapi_freeswitch:bgapi_resp_v/1,
-                    ?BG_TIMEOUT) of 
-                    {'ok', JObj} -> Self ! {'bgok', UUID, kz_json:get_value(<<"response">>, JObj)};
-                    {'error', 'timeout'} ->  Self ! {'timeout', {Cmd, Args}};
-                    Else -> Self ! Else
+                    ?BG_TIMEOUT
+                )
+            of
+                {'ok', JObj} -> Self ! {'bgok', UUID, kz_json:get_value(<<"response">>, JObj)};
+                {'error', 'timeout'} -> Self ! {'timeout', {Cmd, Args}};
+                Else -> Self ! Else
             end
         end
     ),
     {'ok', UUID}.
-    
+
 -spec bgapi(atom(), atom(), string() | binary(), fun()) -> fs_api_return().
 bgapi(Node, Cmd, Args, Fun) -> ?FS_MODULE:bgapi(Node, Cmd, Args, Fun).
 
@@ -240,11 +253,13 @@ nixevent(Node, Event) -> ?FS_MODULE:nixevent(Node, Event).
 -spec sendevent(atom(), atom(), list()) -> 'ok'.
 sendevent(Node, EventName, Headers) ->
     Event = props:filter_undefined(
-        [{<<"FSEvent">>, EventName}
-        ,{<<"FSEvent-Headers">>, Headers}
-        ,{<<"Switch-Nodename">>, kz_term:to_binary(Node)}
-        | kz_api:default_headers(?APP_NAME, ?APP_VERSION)
-    ]),
+        [
+            {<<"FSEvent">>, EventName},
+            {<<"FSEvent-Headers">>, Headers},
+            {<<"Switch-Nodename">>, kz_term:to_binary(Node)}
+            | kz_api:default_headers(?APP_NAME, ?APP_VERSION)
+        ]
+    ),
     kapi_freeswitch:publish_event(Event).
 
 -spec sendevent_custom(atom(), atom(), list()) -> 'ok'.
@@ -255,25 +270,31 @@ sendevent_custom(Node, SubClassName, Headers) ->
 sendmsg(Node, UUID, Headers) ->
     FSHeaders = [{kz_term:to_binary(K), kz_term:to_binary(V)} || {K, V} <- Headers],
     Request = props:filter_undefined(
-             [{<<"UUID">>, UUID}
-             ,{<<"FSHeaders">>, kz_json:from_list(FSHeaders)}
-             ,{<<"Switch-Nodename">>, kz_term:to_binary(Node)}
-              | kz_api:default_headers(?APP_NAME, ?APP_VERSION)
-             ]),    
-    case kz_amqp_worker:call(
+        [
+            {<<"UUID">>, UUID},
+            {<<"FSHeaders">>, kz_json:from_list(FSHeaders)},
+            {<<"Switch-Nodename">>, kz_term:to_binary(Node)}
+            | kz_api:default_headers(?APP_NAME, ?APP_VERSION)
+        ]
+    ),
+    case
+        kz_amqp_worker:call(
             props:filter_undefined(Request),
             fun kapi_freeswitch:publish_sendmsg_request/1,
             fun kapi_freeswitch:sendmsg_resp_v/1,
             ?TIMEOUT
-        ) of
-            {'ok', JObj} ->
-                 Resp = kz_json:get_atom_value(<<"response">>, JObj),
-                 case Resp of
-                     'baduuid' -> {'error', 'baduuid'};
-                     'ok' -> 'ok'
-                 end;
-            {'error', 'timeout'} ->  {'timeout', {UUID, Headers}};
-            Else -> Else
+        )
+    of
+        {'ok', JObj} ->
+            Resp = kz_json:get_atom_value(<<"response">>, JObj),
+            case Resp of
+                'baduuid' -> {'error', 'baduuid'};
+                'ok' -> 'ok'
+            end;
+        {'error', 'timeout'} ->
+            {'timeout', {UUID, Headers}};
+        Else ->
+            Else
     end.
 
 -spec config(atom()) -> 'ok'.
