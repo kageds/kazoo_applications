@@ -63,7 +63,7 @@ init([Node, Options]) ->
     process_flag('trap_exit', 'true'),
     kz_util:put_callid(Node),
     lager:info("starting new fs authn listener for ~s", [Node]),
-%%    gen_server:cast(self(), 'bind_to_directory'),
+    %%    gen_server:cast(self(), 'bind_to_directory'),
     {'ok', #state{
         node = Node,
         options = Options

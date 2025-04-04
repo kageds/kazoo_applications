@@ -607,7 +607,7 @@
 -define(NODE_MODULES, [
     <<"config">>,
     <<"node">>,
-%%    <<"event_stream_sup">>,
+    %%    <<"event_stream_sup">>,
     <<"authn">>,
     <<"channel">>,
     <<"conference">>,

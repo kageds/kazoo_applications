@@ -19,14 +19,15 @@
 %%%-----------------------------------------------------------------------------
 -module(cf_acdc_agent).
 
--export([handle/2
-        ,find_agent/1
-        ,find_agent_status/2
-        ,play_not_an_agent/1
-        ,play_agent_invalid/1
-        ,login_agent/2
-        ,logout_agent/2
-        ]).
+-export([
+    handle/2,
+    find_agent/1,
+    find_agent_status/2,
+    play_not_an_agent/1,
+    play_agent_invalid/1,
+    login_agent/2,
+    logout_agent/2
+]).
 
 -include("acdc_config.hrl").
 -include_lib("callflow/src/callflow.hrl").
@@ -38,24 +39,30 @@
 -spec handle(kz_json:object(), kapps_call:call()) -> 'ok'.
 handle(Data, Call) ->
     kapps_call_command:answer(Call),
-    _ = case find_agent(Call) of
+    _ =
+        case find_agent(Call) of
             {'ok', 'undefined'} ->
                 lager:info("no owner on this device == no agent"),
                 play_not_an_agent(Call);
             {'ok', AgentId} ->
                 Status = find_agent_status(Call, AgentId),
                 NewStatus = fix_data_status(kz_json:get_value(<<"action">>, Data)),
-                lager:info("agent ~s maybe changing status from ~s to ~s", [AgentId, Status, NewStatus]),
+                lager:info("agent ~s maybe changing status from ~s to ~s", [
+                    AgentId, Status, NewStatus
+                ]),
 
                 maybe_update_status(Call, AgentId, Status, NewStatus, Data);
             {'error', 'multiple_owners'} ->
-                lager:info("too many owners of device ~s, not logging in", [kapps_call:authorizing_id(Call)]),
+                lager:info("too many owners of device ~s, not logging in", [
+                    kapps_call:authorizing_id(Call)
+                ]),
                 play_agent_invalid(Call)
         end,
     lager:info("finished with acdc agent callflow"),
     cf_exe:continue(Call).
 
--spec find_agent_status(kapps_call:call() | kz_term:ne_binary(), kz_term:ne_binary()) -> kz_term:ne_binary().
+-spec find_agent_status(kapps_call:call() | kz_term:ne_binary(), kz_term:ne_binary()) ->
+    kz_term:ne_binary().
 find_agent_status(?NE_BINARY = AccountId, AgentId) ->
     fix_agent_status(acdc_agent_util:most_recent_status(AccountId, AgentId));
 find_agent_status(Call, AgentId) ->
@@ -131,19 +138,24 @@ maybe_pause_agent(Call, _AgentId, FromStatus, _Data) ->
 login_agent(Call, AgentId) ->
     login_agent(Call, AgentId, kz_json:new()).
 
--spec login_agent(kapps_call:call(), kz_term:ne_binary(), kz_json:object()) -> api_kz_term:ne_binary().
+-spec login_agent(kapps_call:call(), kz_term:ne_binary(), kz_json:object()) ->
+    api_kz_term:ne_binary().
 login_agent(Call, AgentId, Data) ->
     Update = props:filter_undefined(
-               [{<<"Account-ID">>, kapps_call:account_id(Call)}
-               ,{<<"Agent-ID">>, AgentId}
-               ,{<<"Presence-ID">>, presence_id(Data)}
-               ,{<<"Presence-State">>, presence_state(Data)}
-                | kz_api:default_headers(?APP_NAME, ?APP_VERSION)
-               ]),
-    case kz_amqp_worker:call(Update
-                            ,fun kapi_acdc_agent:publish_login/1
-                            ,fun kapi_acdc_agent:login_resp_v/1
-                            )
+        [
+            {<<"Account-ID">>, kapps_call:account_id(Call)},
+            {<<"Agent-ID">>, AgentId},
+            {<<"Presence-ID">>, presence_id(Data)},
+            {<<"Presence-State">>, presence_state(Data)}
+            | kz_api:default_headers(?APP_NAME, ?APP_VERSION)
+        ]
+    ),
+    case
+        kz_amqp_worker:call(
+            Update,
+            fun kapi_acdc_agent:publish_login/1,
+            fun kapi_acdc_agent:login_resp_v/1
+        )
     of
         {'ok', RespJObj} ->
             kz_json:get_value(<<"Status">>, RespJObj);
@@ -164,10 +176,11 @@ pause_agent(Call, AgentId, Data, Timeout) ->
     _ = play_agent_pause(Call),
     update_agent_status(Call, AgentId, Data, fun kapi_acdc_agent:publish_pause/1, Timeout).
 pause_agent(Call, AgentId, Data) ->
-    Timeout = kz_json:get_integer_value(<<"timeout">>
-                                       ,Data
-                                       ,kapps_config:get_integer(<<"acdc">>, <<"default_agent_pause_timeout">>, 600)
-                                       ),
+    Timeout = kz_json:get_integer_value(
+        <<"timeout">>,
+        Data,
+        kapps_config:get_integer(<<"acdc">>, <<"default_agent_pause_timeout">>, 600)
+    ),
     lager:info("agent ~s is pausing work for ~b s", [AgentId, Timeout]),
     pause_agent(Call, AgentId, Data, Timeout).
 
@@ -179,16 +192,24 @@ update_agent_status(Call, AgentId, Data, PubFun) ->
 update_agent_status(Call, AgentId, Data, PubFun, Timeout) ->
     send_new_status(Call, AgentId, Data, PubFun, Timeout).
 
--spec send_new_status(kapps_call:call(), kz_term:ne_binary(), kz_json:object(), kz_amqp_worker:publish_fun(), kz_term:api_integer()) -> 'ok'.
+-spec send_new_status(
+    kapps_call:call(),
+    kz_term:ne_binary(),
+    kz_json:object(),
+    kz_amqp_worker:publish_fun(),
+    kz_term:api_integer()
+) -> 'ok'.
 send_new_status(Call, AgentId, Data, PubFun, Timeout) ->
     Update = props:filter_undefined(
-               [{<<"Account-ID">>, kapps_call:account_id(Call)}
-               ,{<<"Agent-ID">>, AgentId}
-               ,{<<"Time-Limit">>, Timeout}
-               ,{<<"Presence-ID">>, presence_id(Data)}
-               ,{<<"Presence-State">>, presence_state(Data)}
-                | kz_api:default_headers(?APP_NAME, ?APP_VERSION)
-               ]),
+        [
+            {<<"Account-ID">>, kapps_call:account_id(Call)},
+            {<<"Agent-ID">>, AgentId},
+            {<<"Time-Limit">>, Timeout},
+            {<<"Presence-ID">>, presence_id(Data)},
+            {<<"Presence-State">>, presence_state(Data)}
+            | kz_api:default_headers(?APP_NAME, ?APP_VERSION)
+        ]
+    ),
     PubFun(Update).
 
 -spec presence_id(kz_json:object()) -> api_kz_term:ne_binary().
@@ -208,8 +229,8 @@ format_presence_state(_) -> 'undefined'.
 
 -type find_agent_error() :: 'unknown_endpoint' | 'multiple_owners'.
 -spec find_agent(kapps_call:call()) ->
-          {'ok', kz_term:api_binary()} |
-          {'error', find_agent_error()}.
+    {'ok', kz_term:api_binary()}
+    | {'error', find_agent_error()}.
 find_agent(Call) ->
     find_agent(Call, kapps_call:authorizing_id(Call)).
 
@@ -231,10 +252,10 @@ find_agent(Call, Endpoint, Owners) ->
 find_agent_owner(Call, 'undefined') -> {'ok', kapps_call:owner_id(Call)};
 find_agent_owner(_Call, EPOwnerId) -> {'ok', EPOwnerId}.
 
-
 -spec play_not_an_agent(kapps_call:call()) -> kapps_call:kapps_api_std_return().
 play_not_an_agent(Call) -> kapps_call_command:b_prompt(<<"agent-not_call_center_agent">>, Call).
-play_agent_logged_in_already(Call) -> kapps_call_command:b_prompt(<<"agent-already_logged_in">>, Call).
+play_agent_logged_in_already(Call) ->
+    kapps_call_command:b_prompt(<<"agent-already_logged_in">>, Call).
 play_agent_logged_in(Call) -> kapps_call_command:b_prompt(<<"agent-logged_in">>, Call).
 play_agent_logged_out(Call) -> kapps_call_command:b_prompt(<<"agent-logged_out">>, Call).
 play_agent_resume(Call) -> kapps_call_command:b_prompt(<<"agent-resume">>, Call).

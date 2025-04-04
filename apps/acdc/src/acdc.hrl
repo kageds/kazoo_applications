@@ -30,8 +30,10 @@
 -define(OWNER_UPDATE_REG(AccountId, OwnerId), {'p', 'l', {'owner_update', AccountId, OwnerId}}).
 
 -define(NEW_CHANNEL_REG(AccountId, User), {'p', 'l', {'new_channel', AccountId, User}}).
--define(NEW_CHANNEL_TO(CallId, Number, Name), {{'call_to', Number, Name},  CallId}).
--define(NEW_CHANNEL_FROM(CallId, Number, Name, MemberCallId), {{'call_from', Number, Name}, CallId, MemberCallId}).
+-define(NEW_CHANNEL_TO(CallId, Number, Name), {{'call_to', Number, Name}, CallId}).
+-define(NEW_CHANNEL_FROM(CallId, Number, Name, MemberCallId), {
+    {'call_from', Number, Name}, CallId, MemberCallId
+}).
 
 -define(DESTROYED_CHANNEL_REG(AccountId, User), {'p', 'l', {'destroyed_channel', AccountId, User}}).
 -define(DESTROYED_CHANNEL(CallId, HangupCause), {'call_down', CallId, HangupCause}).
@@ -40,9 +42,17 @@
 
 -type announcements_pids() :: #{kz_term:ne_binary() => pid()}.
 
--type fsm_state_name() :: 'wait' | 'sync' | 'ready' | 'ringing' |
-                          'ringing_callback' | 'awaiting_callback' |
-                          'answered' | 'wrapup' | 'paused' | 'outbound'.
+-type fsm_state_name() ::
+    'wait'
+    | 'sync'
+    | 'ready'
+    | 'ringing'
+    | 'ringing_callback'
+    | 'awaiting_callback'
+    | 'answered'
+    | 'wrapup'
+    | 'paused'
+    | 'outbound'.
 
 -type agent_priority() :: -128..128.
 
@@ -60,16 +70,32 @@
 
 -define(PRINT(Str), ?PRINT(Str, [])).
 -define(PRINT(Fmt, Args), begin
-                              lager:info(Fmt, Args),
-                              io:format(Fmt++"\n", Args)
-                          end).
+    lager:info(Fmt, Args),
+    io:format(Fmt ++ "\n", Args)
+end).
 
--define(AGENT_INFO_FIELDS, kapps_config:get(?CONFIG_CAT, <<"agent_info_fields">>
-                                           ,[<<"presence_id">>, <<"first_name">>, <<"last_name">>, <<"username">>, <<"email">>]
-                                           )).
+-define(AGENT_INFO_FIELDS,
+    kapps_config:get(
+        ?CONFIG_CAT,
+        <<"agent_info_fields">>,
+        [<<"presence_id">>, <<"first_name">>, <<"last_name">>, <<"username">>, <<"email">>]
+    )
+).
 
--define(CALL_INFO_FIELDS, kapps_config:get(?CONFIG_CAT, <<"call_info_fields">>
-                                           ,[<<"call_id">>, <<"queue_id">>, <<"entered_timestamp">>, <<"entered_position">>, <<"caller_id_name">>, <<"caller_id_number">>, <<"required_skills">>]
-                                           )).
+-define(CALL_INFO_FIELDS,
+    kapps_config:get(
+        ?CONFIG_CAT,
+        <<"call_info_fields">>,
+        [
+            <<"call_id">>,
+            <<"queue_id">>,
+            <<"entered_timestamp">>,
+            <<"entered_position">>,
+            <<"caller_id_name">>,
+            <<"caller_id_number">>,
+            <<"required_skills">>
+        ]
+    )
+).
 -define(ACDC_HRL, 'true').
 -endif.

@@ -63,18 +63,18 @@ start_link(Node, Bindings, Packet) ->
 init([Node, Bindings, Packet]) ->
     process_flag('trap_exit', 'true'),
     kz_util:put_callid(list_to_binary([kz_term:to_binary(Node), <<"-eventstream">>])),
-%%    request_event_stream(#state{
-%%        node = Node,
-%%        bindings = Bindings,
-%%        packet = Packet,
-%%        idle_alert = idle_alert_timeout()
-%%    }).
+    %%    request_event_stream(#state{
+    %%        node = Node,
+    %%        bindings = Bindings,
+    %%        packet = Packet,
+    %%        idle_alert = idle_alert_timeout()
+    %%    }).
     #state{
-    node = Node,
-    bindings = Bindings,
-    packet = Packet,
-    idle_alert = idle_alert_timeout()
-}.
+        node = Node,
+        bindings = Bindings,
+        packet = Packet,
+        idle_alert = idle_alert_timeout()
+    }.
 
 %%------------------------------------------------------------------------------
 %% @doc Handling call messages.

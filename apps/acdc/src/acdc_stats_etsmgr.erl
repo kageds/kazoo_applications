@@ -17,22 +17,24 @@
 -export([start_link/2]).
 
 %% gen_server callbacks
--export([init/1
-        ,handle_call/3
-        ,handle_cast/2
-        ,handle_info/2
-        ,terminate/2
-        ,code_change/3
-        ]).
+-export([
+    init/1,
+    handle_call/3,
+    handle_cast/2,
+    handle_info/2,
+    terminate/2,
+    code_change/3
+]).
 
 -include("acdc.hrl").
 
 -define(SERVER, ?MODULE).
 
--record(state, {table_id :: ets:tid() | 'undefined'
-               ,etssrv :: kz_term:api_pid()
-               ,give_away_ref :: kz_term:api_reference()
-               }).
+-record(state, {
+    table_id :: ets:tid() | 'undefined',
+    etssrv :: kz_term:api_pid(),
+    give_away_ref :: kz_term:api_reference()
+}).
 -type state() :: #state{}.
 
 %%%=============================================================================
@@ -85,9 +87,10 @@ handle_cast({'begin', TableId, TableOptions}, State) ->
     Tbl = ets:new(TableId, TableOptions),
 
     ets:setopts(Tbl, {'heir', self(), 'ok'}),
-    {'noreply', State#state{table_id=Tbl
-                           ,give_away_ref=send_give_away_retry(Tbl, 'ok', 0)
-                           }};
+    {'noreply', State#state{
+        table_id = Tbl,
+        give_away_ref = send_give_away_retry(Tbl, 'ok', 0)
+    }};
 handle_cast(_Msg, State) ->
     lager:debug("unhandled cast: ~p", [_Msg]),
     {'noreply', State}.
@@ -99,30 +102,41 @@ handle_cast(_Msg, State) ->
 %% @end
 %%------------------------------------------------------------------------------
 -spec handle_info(any(), state()) -> kz_types:handle_info_ret_state(state()).
-handle_info({'ETS-TRANSFER', Tbl, Etssrv, Data}, #state{table_id=Tbl
-                                                       ,etssrv=Etssrv
-                                                       ,give_away_ref='undefined'
-                                                       }=State) ->
+handle_info(
+    {'ETS-TRANSFER', Tbl, Etssrv, Data},
+    #state{
+        table_id = Tbl,
+        etssrv = Etssrv,
+        give_away_ref = 'undefined'
+    } = State
+) ->
     lager:debug("ets table ~p transferred back to ourselves", [Tbl]),
-    {'noreply', State#state{etssrv='undefined'
-                           ,give_away_ref=send_give_away_retry(Tbl, Data, 0)
-                           }};
-handle_info({'give_away', Tbl, Data}, #state{table_id=Tbl
-                                            ,etssrv='undefined'
-                                            ,give_away_ref=Ref
-                                            }=State) when is_reference(Ref) ->
+    {'noreply', State#state{
+        etssrv = 'undefined',
+        give_away_ref = send_give_away_retry(Tbl, Data, 0)
+    }};
+handle_info(
+    {'give_away', Tbl, Data},
+    #state{
+        table_id = Tbl,
+        etssrv = 'undefined',
+        give_away_ref = Ref
+    } = State
+) when is_reference(Ref) ->
     lager:debug("give away ~p: ~p", [Tbl, Data]),
     case find_ets_mgr(Tbl, Data) of
         P when is_pid(P) ->
             lager:debug("handing tbl ~p back to ~p and then to ~p", [Tbl, self(), P]),
-            {'noreply', State#state{etssrv=P
-                                   ,give_away_ref='undefined'
-                                   }};
+            {'noreply', State#state{
+                etssrv = P,
+                give_away_ref = 'undefined'
+            }};
         Ref when is_reference(Ref) ->
             lager:debug("ets mgr died already, hasn't resumed life yet; waiting"),
-            {'noreply', State#state{etssrv='undefined'
-                                   ,give_away_ref=Ref
-                                   }}
+            {'noreply', State#state{
+                etssrv = 'undefined',
+                give_away_ref = Ref
+            }}
     end;
 handle_info(_Info, State) ->
     lager:debug("unhandled message: ~p", [_Info]),
@@ -130,7 +144,8 @@ handle_info(_Info, State) ->
 
 find_ets_mgr(Tbl, Data) ->
     case acdc_stats_sup:stats_srv() of
-        {'error', 'not_found'} -> send_give_away_retry(Tbl, Data);
+        {'error', 'not_found'} ->
+            send_give_away_retry(Tbl, Data);
         {'ok', P} when is_pid(P) ->
             link(P),
             ets:give_away(Tbl, P, Data),

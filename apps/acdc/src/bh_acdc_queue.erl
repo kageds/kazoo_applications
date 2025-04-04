@@ -6,19 +6,19 @@
 %%%-----------------------------------------------------------------------------
 -module(bh_acdc_queue).
 
--export([init/0
-        ,validate/2
-        ,bindings/2
-        ]).
+-export([
+    init/0,
+    validate/2,
+    bindings/2
+]).
 
 -include_lib("../blackhole/src/blackhole.hrl").
 
--define(BINDING(),
-       [
-        <<"acdc_queue.doc_created">>
-       ,<<"acdc_queue.doc_edited">>
-       ,<<"acdc_queue.doc_deleted">>
-       ]).
+-define(BINDING(), [
+    <<"acdc_queue.doc_created">>,
+    <<"acdc_queue.doc_edited">>,
+    <<"acdc_queue.doc_deleted">>
+]).
 
 -spec init() -> any().
 init() ->
@@ -34,31 +34,41 @@ init_bindings() ->
     end.
 
 -spec validate(bh_context:context(), map()) -> bh_context:context().
-validate(Context, #{keys := [Action]
-                   }) when Action =:= <<"doc_created">> 
-                           ; Action =:= <<"doc_edited">> 
-                           ; Action =:= <<"doc_deleted">> ->
+validate(Context, #{keys := [Action]}) when
+    Action =:= <<"doc_created">>;
+    Action =:= <<"doc_edited">>;
+    Action =:= <<"doc_deleted">>
+->
     Context;
 validate(Context, #{keys := Keys}) ->
-    bh_context:add_error(Context, <<"invalid format for queues subscription : ", (kz_binary:join(Keys))/binary>>).
+    bh_context:add_error(
+        Context, <<"invalid format for queues subscription : ", (kz_binary:join(Keys))/binary>>
+    ).
 
 -spec bindings(bh_context:context(), map()) -> map().
-bindings(_Context, #{account_id := AccountId
-                    ,keys := [Action]
-                    }=Map) ->
+bindings(
+    _Context,
+    #{
+        account_id := AccountId,
+        keys := [Action]
+    } = Map
+) ->
     Requested = <<"acdc_queue.", Action/binary>>,
     AccountDb = kz_util:format_account_db(AccountId),
     Subscribed = [<<Action/binary, ".", AccountDb/binary, ".queue.*">>],
     Listeners = [{'amqp', 'conf', bind_options(Action, <<"queue">>, AccountDb)}],
-    Map#{requested => Requested
-        ,subscribed => Subscribed
-        ,listeners => Listeners
-        }.
+    Map#{
+        requested => Requested,
+        subscribed => Subscribed,
+        listeners => Listeners
+    }.
 
--spec bind_options(kz_term:ne_binary(), kz_term:ne_binary(), kz_term:ne_binary()) -> kz_term:proplist().
+-spec bind_options(kz_term:ne_binary(), kz_term:ne_binary(), kz_term:ne_binary()) ->
+    kz_term:proplist().
 bind_options(Action, Type, Db) ->
-    [{'action', Action}
-    ,{'db', Db}
-    ,{'doc_type', Type}
-    ,'federate'
+    [
+        {'action', Action},
+        {'db', Db},
+        {'doc_type', Type},
+        'federate'
     ].

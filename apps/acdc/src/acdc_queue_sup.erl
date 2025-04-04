@@ -16,19 +16,21 @@
 -define(SERVER, ?MODULE).
 
 %% API
--export([start_link/2
-        ,stop/1
-        ,manager/1
-        ,workers_sup/1
-        ,status/1
-        ]).
+-export([
+    start_link/2,
+    stop/1,
+    manager/1,
+    workers_sup/1,
+    status/1
+]).
 
 %% Supervisor callbacks
 -export([init/1]).
 
--define(CHILDREN, [?SUPER('acdc_queue_workers_sup')
-                  ,?WORKER_ARGS('acdc_queue_manager', [self() | Args])
-                  ]).
+-define(CHILDREN, [
+    ?SUPER('acdc_queue_workers_sup'),
+    ?WORKER_ARGS('acdc_queue_manager', [self() | Args])
+]).
 
 %%%=============================================================================
 %%% api functions
@@ -67,18 +69,21 @@ status(Supervisor) ->
 
     {Available, Busy} = acdc_queue_manager:status(Manager),
     ?PRINT("    Available Agents: (Total : ~p) ", [length(Available)]),
-    _ = case Available of
+    _ =
+        case Available of
             [] -> ?PRINT("      NONE");
             As -> [?PRINT("      ~s", [A]) || A <- As]
         end,
     ?PRINT("    Busy Agents: (Total : ~p) ", [length(Busy)]),
-    _ = case Busy of
+    _ =
+        case Busy of
             [] -> ?PRINT("      NONE");
             Bs -> [?PRINT("      ~s", [B]) || B <- Bs]
         end,
     Queued_calls = acdc_queue_manager:calls(Manager),
     ?PRINT("    Queued Calls: (Total : ~p) ", [length(Queued_calls)]),
-    _ = case Queued_calls of
+    _ =
+        case Queued_calls of
             [] -> ?PRINT("      NONE");
             Cs -> [?PRINT("      ~p", [C]) || C <- Cs]
         end,

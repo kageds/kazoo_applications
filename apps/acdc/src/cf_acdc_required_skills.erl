@@ -64,8 +64,9 @@ add_skills(Add, Skills) ->
 %%------------------------------------------------------------------------------
 -spec remove_skills(kz_term:ne_binaries(), kz_term:ne_binaries()) -> kz_term:ne_binaries().
 remove_skills(Remove, Skills) ->
-    lists:filter(fun(Skill) ->
-                         not lists:member(Skill, Remove)
-                 end
-                ,Skills
-                ).
+    lists:filter(
+        fun(Skill) ->
+            not lists:member(Skill, Remove)
+        end,
+        Skills
+    ).
