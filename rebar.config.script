@@ -70,14 +70,12 @@ Config = [
 {plugins, [rebar3_auto
            ,rebar3_git_vsn
           ]},
-
-
-
-
 {deps, [{lager, "3.9.2"}
         ,{lager_syslog, {git, "https://github.com/erlang-lager/lager_syslog.git", {tag, "3.0.3"}}}
         ,{syslog, {git, "https://github.com/2600hz/erlang-syslog", {ref, "bbad537a1cb5e4f37e672d2e2665659e850662d0"}}}
         ,{rebar_vsn_plugin,{git, "https://github.com/erlware/rebar_vsn_plugin.git", {branch, "master"}}}
+        ,{martini,{git, "https://github.com/openkazoo/martini.git", {branch, "main"}}}
+
        ] ++
         [{K, {git_subdir, "https://github.com/kageds/kazoo_core.git", {branch, Branch}, "apps"}} || K <- KAZOO_CORE]},
 
@@ -132,6 +130,7 @@ Config = [
         ,{hotornot, none}
         ,{jonny5, none}
         ,{konami, none}
+        ,{martini, none}
         ,{media_mgr, none}
         ,{milliwatt, none}
         ,{notify, none}
