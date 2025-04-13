@@ -23,12 +23,15 @@
     sendmsg_request/1,
     sendmsg_request_v/1,
     sendmsg_resp_v/1,
+    event/1,
+    event_v/1,
     declare_exchanges/0,
     publish_fetch_resp/3,
     publish_api_request/1,
     publish_bgapi_request/1,
     publish_ping_request/1,
-    publish_sendmsg_request/1
+    publish_sendmsg_request/1,
+    publish_event/1
 ]).
 
 -include_lib("kazoo_stdlib/include/kz_types.hrl").
@@ -215,6 +218,34 @@ sendmsg_resp_v(Prop) when is_list(Prop) ->
 sendmsg_resp_v(JObj) ->
     sendmsg_resp_v(kz_json:to_proplist(JObj)).
 
+
+%%------------------------------------------------------------------------------
+%% @doc Directory Response.
+%% Takes proplist, creates JSON string or error.
+%% @end
+%%------------------------------------------------------------------------------
+-spec event(kz_term:api_terms()) ->
+    {'ok', iolist()}
+    | {'error', string()}.
+event(Prop) when is_list(Prop) ->
+    case event_v(Prop) of
+        'true' ->
+            kz_api:build_message(Prop, ?EVENT_HEADERS, ?OPTIONAL_EVENT_HEADERS);
+        'false' ->
+            {'error', "Proplist failed validation for event"}
+    end;
+event(JObj) ->
+    event(kz_json:to_proplist(JObj)).
+
+-spec event_v(kz_term:api_terms()) -> boolean().
+event_v(Prop) when is_list(Prop) ->
+    Valid = kz_api:validate(
+        Prop, ?EVENT_HEADERS, ?EVENT_VALUES, ?EVENT_TYPES
+    ),
+    Valid;
+event_v(JObj) ->
+    event_v(kz_json:to_proplist(JObj)).
+
 %%------------------------------------------------------------------------------
 %% @doc Declare the exchanges used by this API.
 %% @end
@@ -282,3 +313,18 @@ publish_sendmsg_request(Request) ->
             {'reply_to', ServerID}, {'correlation_id', MsgID}
         ]
     ).
+
+-spec publish_event(kz_term:api_terms()) -> 'ok'.
+publish_event(Event) ->
+    Type = props:get_value(<<"FSEvent">>, Event),
+    {'ok', Payload} = kz_api:prepare_api_payload(
+        Event, ?EVENT_VALUES, fun event/1
+    ),
+    kz_amqp_util:basic_publish(
+        ?FREESWITCH_EXCHANGE,
+        <<"KAZOO.event.", Type/binary>>,
+        Payload,
+        ?DEFAULT_CONTENT_TYPE
+    ).
+
+

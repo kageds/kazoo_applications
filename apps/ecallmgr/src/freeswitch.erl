@@ -254,8 +254,8 @@ nixevent(Node, Event) -> ?FS_MODULE:nixevent(Node, Event).
 sendevent(Node, EventName, Headers) ->
     Event = props:filter_undefined(
         [
-            {<<"FSEvent">>, EventName},
-            {<<"FSEvent-Headers">>, Headers},
+            {<<"FSEvent">>, kz_term:to_binary(EventName)},
+            {<<"FSEvent-Headers">>, fix_headers(Headers)},
             {<<"Switch-Nodename">>, kz_term:to_binary(Node)}
             | kz_api:default_headers(?APP_NAME, ?APP_VERSION)
         ]
@@ -268,11 +268,10 @@ sendevent_custom(Node, SubClassName, Headers) ->
 
 -spec sendmsg(atom(), kz_term:ne_binary(), list()) -> fs_api_return().
 sendmsg(Node, UUID, Headers) ->
-    FSHeaders = [{kz_term:to_binary(K), kz_term:to_binary(V)} || {K, V} <- Headers],
     Request = props:filter_undefined(
         [
             {<<"UUID">>, UUID},
-            {<<"FSHeaders">>, kz_json:from_list(FSHeaders)},
+            {<<"FSHeaders">>, fix_headers(Headers)},
             {<<"Switch-Nodename">>, kz_term:to_binary(Node)}
             | kz_api:default_headers(?APP_NAME, ?APP_VERSION)
         ]
@@ -296,6 +295,11 @@ sendmsg(Node, UUID, Headers) ->
         Else ->
             Else
     end.
+
+fix_headers(Headers) ->
+    kz_json:from_list(
+        lists:map(fun({Key, Value}) -> {kz_term:to_binary(Key), kz_term:to_binary(Value)} end, Headers)
+    ).
 
 -spec config(atom()) -> 'ok'.
 config(Node) -> ?FS_MODULE:config(Node).

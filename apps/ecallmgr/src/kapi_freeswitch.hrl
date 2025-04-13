@@ -23,6 +23,9 @@
 -define(SENDMSG_REQ_NAME, <<"sendmsg_req">>).
 -define(SENDMSG_RESP_NAME, <<"sendmsg_resp">>).
 
+-define(EVENT_EVENT_CATEGORY, <<"event">>).
+-define(EVENT_EVENT_NAME, <<"event">>).
+
 %% Directory Responses
 -define(DIRECTORY_RESP_HEADERS, [<<"response">>, <<"Fetch-UUID">>, <<"Switch-Nodename">>]).
 
@@ -123,6 +126,21 @@
 -define(SENDMSG_RESPONSE_VALUES, []).
 
 -define(SENDMSG_RESPONSE_TYPES, [{<<"response">>, fun erlang:is_binary/1}]).
+
+
+%% Events
+-define(EVENT_HEADERS, [<<"FSEvent">>, <<"FSEvent-Headers">>, <<"Switch-Nodename">>]).
+
+-define(OPTIONAL_EVENT_HEADERS, []).
+
+-define(EVENT_VALUES, [
+    {<<"Event-Category">>, ?EVENT_EVENT_CATEGORY},
+    {<<"Event-Name">>, ?EVENT_EVENT_NAME}
+]).
+
+-define(EVENT_TYPES, [{<<"FSEvent">>, fun erlang:is_binary/1}
+                      ,{<<"FSEvent-Headers">>, fun kz_json:is_json_object/1}]).
+
 
 -define(KAPI_DIRECTORY_HRL, 'true').
 -endif.

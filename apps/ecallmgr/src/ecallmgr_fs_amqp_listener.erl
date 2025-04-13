@@ -97,6 +97,7 @@ handle_event(JObj) ->
     lager:info("send event message ~p", [EventName]),
     case EventName of
         <<"HEARTBEAT">> -> ecallmgr_fs_nodes:add(Node);
+        <<"SHUTDOWN">> -> ecallmgr_fs_nodes ! {'nodedown', Node};
         _ -> ok
     end,
     ecallmgr_events:event(EventName, ID, Props, Node).
