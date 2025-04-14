@@ -1,29 +1,47 @@
 version: 2.1
 
-executors:
-  erlang-executor:
-    docker:
-      - image: erlang:24.3.4.17  # Erlang container (Debian-based)
-      - image: rabbitmq:3.12-management  # RabbitMQ service container
-      - image: couchdb:3  # CouchDB service container
-    working_directory: ~/project
-
 jobs:
   build:
-    executor: erlang-executor
+    docker:
+      - image: erlang:24.3.4.17  # Primary container
+      - image: rabbitmq:3.12-management  # RabbitMQ service
+      - image: couchdb:3  # CouchDB service
+        environment:
+          COUCHDB_USER: admin
+          COUCHDB_PASSWORD: password
+    working_directory: ~/project
     steps:
       - checkout
+
+      - run:
+          name: Install Dependencies
+          command: |
+            apt-get update && apt-get install -y netcat curl
 
       - run:
           name: Wait for CouchDB and RabbitMQ
           command: |
             echo "Waiting for CouchDB..."
-            until curl -s http://localhost:5984/; do sleep 5; done
+            timeout=60
+            until curl -s -u admin:password http://localhost:5984/; do
+              ((timeout--)) || { echo "CouchDB not responding in time"; exit 1; }
+              sleep 1
+            done
             echo "CouchDB is up!"
 
             echo "Waiting for RabbitMQ..."
-            until nc -z localhost 5672; do sleep 5; done
+            timeout=60
+            until nc -z localhost 5672; do
+              ((timeout--)) || { echo "RabbitMQ not responding in time"; exit 1; }
+              sleep 1
+            done
             echo "RabbitMQ is up!"
+
+      - run:
+          name: Prepare Config File
+          command: |
+            mkdir -p /etc/kazoo/core/
+            cp ./config/config.ini.circleci /etc/kazoo/core/config.ini
 
       - run:
           name: Compile Code
@@ -38,4 +56,3 @@ workflows:
   build-and-test:
     jobs:
       - build
-
