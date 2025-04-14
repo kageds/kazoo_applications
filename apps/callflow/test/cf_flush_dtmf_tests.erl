@@ -11,6 +11,7 @@
 %%%-----------------------------------------------------------------------------
 -module(cf_flush_dtmf_tests).
 
+-spec test() -> ok.
 -include_lib("eunit/include/eunit.hrl").
 
 %%%=============================================================================
@@ -21,6 +22,7 @@
 %% @doc Verify the cleared DTMF collection is persisted on the call.
 %% @end
 %%------------------------------------------------------------------------------
+-spec persisted_test_() -> any().
 persisted_test_() ->
     {'setup',
         fun() ->

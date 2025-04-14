@@ -1,0 +1,41 @@
+version: 2.1
+
+executors:
+  erlang-executor:
+    docker:
+      - image: erlang:24.3.4.17  # Erlang container (Debian-based)
+      - image: rabbitmq:3.12-management  # RabbitMQ service container
+      - image: couchdb:3  # CouchDB service container
+    working_directory: ~/project
+
+jobs:
+  build:
+    executor: erlang-executor
+    steps:
+      - checkout
+
+      - run:
+          name: Wait for CouchDB and RabbitMQ
+          command: |
+            echo "Waiting for CouchDB..."
+            until curl -s http://localhost:5984/; do sleep 5; done
+            echo "CouchDB is up!"
+
+            echo "Waiting for RabbitMQ..."
+            until nc -z localhost 5672; do sleep 5; done
+            echo "RabbitMQ is up!"
+
+      - run:
+          name: Compile Code
+          command: make compile
+
+      - run:
+          name: Run Tests
+          command: make test && make ct
+
+workflows:
+  version: 2
+  build-and-test:
+    jobs:
+      - build
+

@@ -3192,6 +3192,7 @@ return_to_state(Fails, MaxFails) ->
 %% Orig [X] Curr [Y] => {[Y], [X]}
 %% Orig [X, Y] Curr [Y] => {[], [X]}
 %% Orig [X] Curr [X, Y] => {[Y], []}
+-spec changed_endpoints(list(), list()) -> {list(), list()}.
 changed_endpoints([], EPs) -> {EPs, []};
 changed_endpoints(OrigEPs, EPs) -> changed_endpoints(OrigEPs, EPs, []).
 

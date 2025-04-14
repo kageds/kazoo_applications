@@ -6,8 +6,10 @@
 %%%-----------------------------------------------------------------------------
 -module(acdc_agent_fsm_tests).
 
+-spec test() -> ok.
 -include_lib("eunit/include/eunit.hrl").
 
+-spec changed_endpoints_test_() -> any().
 changed_endpoints_test_() ->
     X = kz_json:from_list([{<<"_id">>, <<"x">>}]),
     Y = kz_json:from_list([{<<"_id">>, <<"y">>}]),
