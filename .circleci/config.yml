@@ -17,7 +17,14 @@ jobs:
           name: Install Dependencies
           command: |
             apt-get update && apt-get install -y netcat curl
-
+      - run:
+          name: Install Go
+          command: |
+            GO_VERSION=1.24.2
+            curl -OL https://golang.org/dl/go${GO_VERSION}.linux-amd64.tar.gz
+            tar -C /usr/local -xzf go${GO_VERSION}.linux-amd64.tar.gz
+            echo 'export PATH=$PATH:/usr/local/go/bin' >> $BASH_ENV
+            source $BASH_ENV
       - run:
           name: Wait for CouchDB and RabbitMQ
           command: |
