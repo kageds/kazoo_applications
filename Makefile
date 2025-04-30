@@ -29,15 +29,21 @@ ifeq ($(ERL),)
 $(error "Erlang not available on this system")
 endif
 
-REBAR_GLOBAL_CONFIG_DIR=${HOME}
-REBAR_CACHE_DIR=${HOME}/.cache/rebar3
-REBAR=./rebar3
+REBAR = REBAR_GLOBAL_CONFIG_DIR=${HOME} REBAR_CACHE_DIR=${HOME}/.cache/rebar3 rebar3
 
 ifeq ($(REBAR),)
 $(error "Rebar not available on this system")
 endif
 
-.PHONY: all compile doc clean lint format tree test dialyzer typer shell distclean pdf \
+APPS := $(shell \
+  for d in apps/*; do \
+    if [ -d "$$d/test" ] && find "$$d/test" -type f -name "*test*.erl" -print -quit | grep -q .; then \
+      basename $$d; \
+    fi; \
+  done \
+)
+
+.PHONY: all compile doc clean lint format tree compile-test test dialyzer typer shell distclean pdf \
   update-deps clean-common-test-data rebuild
 
 all: deps compile dialyzer test
@@ -57,6 +63,9 @@ update-deps:
 compile:
 		$(REBAR) compile
 
+compile-test:
+		$(REBAR) as test compile
+
 # Format the code (if you use the rebar3_format plugin)
 lint:
 		$(REBAR) lint
@@ -73,10 +82,8 @@ build-release:
 doc:
 		$(REBAR) doc
 
-eunit: compile clean-common-test-data
-		$(REBAR) eunit
-
-test: compile eunit
+test: compile-test
+	ERL_LIBS=./_build/test/lib/ ./scripts/eunit_run.escript $(APPS) || true
 
 $(DEPS_PLT):
 		@echo Building local plt at $(DEPS_PLT)
@@ -85,19 +92,18 @@ $(DEPS_PLT):
 		   --apps $(DEPS) -r apps
 
 dialyzer: $(DEPS_PLT)
-		dialyzer --fullpath --plt $(DEPS_PLT) -Wrace_conditions -r ./_build/default/lib
+		dialyzer --fullpath --plt $(DEPS_PLT) -Wrace_conditions --src -r ./apps
 
 typer:
 		typer --plt $(DEPS_PLT) -r ./src
 
-shell: deps compile
+shell: 
 # You often want *rebuilt* rebar tests to be available to the
 # shell you have to call eunit (to get the tests
 # rebuilt). However, eunit runs the tests, which probably
 # fails (thats probably why You want them in the shell). This
 # runs eunit but tells make to ignore the result.
-		- @$(REBAR) skip_deps=true eunit
-		@$(ERL) $(ERLFLAGS)
+		$(REBAR) as test shell
 
 pdf:
 		pandoc README.md -o README.pdf
