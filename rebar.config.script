@@ -160,8 +160,16 @@ Config = [
  ]
 },
 
-{profiles, [{prod, [{relx, [ {dev_mode, false},
+{profiles, [{prod, [{relx, [{dev_mode, false},
                             {include_erts, true}]}]
-            }]
+            },
+            {test, [{erl_opts,
+                    [debug_info,
+                    {parse_transform, lager_transform},
+                    {warnings_as_errors, false},
+                    {d, 'TEST'},
+                    {d, 'AMQP_TESTS'}]}]}
+           ]
+
 }
 ].
