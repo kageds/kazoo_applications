@@ -1443,7 +1443,9 @@ maybe_connect_to_agent(MyQ, EPs, Call, Timeout, AgentId, _CdrUrl) ->
         {<<"Request-ID">>, ReqId},
         {<<"Retain-CID">>, <<"true">>},
         {<<"Agent-ID">>, AgentId},
-        {<<"Member-Call-ID">>, MCallId}
+        {<<"Member-Call-ID">>, MCallId},
+        {<<?CALL_INTERACTION_ID>>, kapps_call:custom_channel_var(<<?CALL_INTERACTION_ID>>, Call)}
+
     ]),
 
     {ACallIds, Endpoints} = lists:foldl(
