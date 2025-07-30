@@ -100,7 +100,7 @@ handle_event(JObj) ->
         <<"SHUTDOWN">> -> ecallmgr_fs_nodes ! {'nodedown', Node};
         _ -> ok
     end,
-    ecallmgr_events:event(EventName, ID, Props, Node).
+    ecallmgr_events:event(EventName, ID, get_fs_props(Node) ++ Props, Node).
 
 handle_configuration_message(JObj) ->
     Action = kz_json:get_value(<<"action">>, JObj),
@@ -136,7 +136,7 @@ handle_dialplan_message(JObj) ->
     case Action of
         <<"request">> ->
             _ = kz_util:spawn(fun process_route_req/5, [
-                'dialplan', Node, FSId, CallId, Props ++ interaction_props(Node, CallId, Props)
+                'dialplan', Node, FSId, CallId, Props ++ interaction_props(Node, CallId, Props) ++ get_fs_props(Node)
             ]);
         _ ->
             lager:info("unknown action: ~p", [Action])
@@ -200,6 +200,25 @@ code_change(_OldVsn, State, _Extra) ->
 %%%=============================================================================
 %%% Internal functions
 %%%=============================================================================
+get_fs_props(Node) ->
+    try ecallmgr_fs_node:sip_url(Node) of
+        'undefined' ->
+            lager:debug("no sip url available yet for ~s", [Node]),
+            [];
+        SwitchURL ->
+            [_, SwitchURIHost] = binary:split(SwitchURL, <<"@">>),
+            SwitchURI = <<"sip:", SwitchURIHost/binary>>,
+            props:filter_undefined([{<<"Switch-URL">>, SwitchURL}
+                                     ,{<<"Switch-URI">>, SwitchURI}
+                                     ,{<<"Switch-Nodename">>, kz_term:to_binary(Node)}
+                                    ]
+                                   )
+    catch
+        _E:_R ->
+            lager:warning("failed to include switch_url/uri for node ~s : ~p : ~p", [Node, _E, _R]),
+            []
+    end.
+
 -spec get_node_name(kz_term:proplist()) -> atom().
 get_node_name(Props) ->
     props:get_atom_value(<<"Switch-Nodename">>, Props).
